@@ -163,9 +163,9 @@ function cash() {
     `<text x="281" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="34" fill="${C.ink}">DT</text>`;
 }
 function grid6() {
-  const items = [sock, sponges, hijabPins, phoneGlass, beanie, spray];
-  return items.map((f, i) => { const x = (i % 3) * 133, y = Math.floor(i / 3) * 200 + 10;
-    return place(f(), x + 4, y, 0.31); }).join("");
+  const items = [sock, phoneGlass, beanie, spray];
+  return items.map((f, i) => { const x = (i % 2) * 205, y = Math.floor(i / 2) * 205;
+    return place(f(), x, y, 0.48); }).join("");
 }
 
 module.exports = { C, svg, sock, glove, sponges, sinkNet, airfryer, hijabPins, phoneGlass, carBag, catGlove, cloths, beanie, hijabPack, pot, spray, study, ramadan, bag, truck, cash, grid6, box };

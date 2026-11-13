@@ -11,17 +11,18 @@ const CSS = (W, H, PT, PB) => `
 --display:"Archivo Black","Arial Black",system-ui,sans-serif;--body:"IBM Plex Sans","IBM Plex Sans Arabic",Arial,sans-serif;--ar:"IBM Plex Sans Arabic",Tahoma,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
 *{box-sizing:border-box}
 html,body{margin:0;width:${W}px;height:${H}px;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--body)}
-.fr{position:absolute;inset:0;padding:${PT}px 88px ${PB}px;display:flex;flex-direction:column;gap:34px}
+.fr{position:absolute;inset:0;padding:${PT}px 88px ${PB}px;display:flex;flex-direction:column;gap:${H>1500?40:28}px}
 .hd{display:flex;justify-content:space-between;align-items:center;flex:none}
 .logo{font-family:var(--display);font-size:60px;line-height:1;display:flex;align-items:center;gap:18px;letter-spacing:-.01em}
 .logo i{font:600 40px/1 var(--mono);font-style:normal;background:var(--tag);color:#fff;padding:8px 14px;border-radius:8px}
 .hd .ar{font:700 56px/1 var(--ar);direction:rtl}
-.card{flex:1 1 0;min-height:0;border-radius:44px;position:relative;display:flex;align-items:center;justify-content:center;padding:40px}
-.card>svg{width:100%;height:100%}
-.tag{position:absolute;right:36px;bottom:30px;transform:rotate(-4deg);background:var(--tag);color:#fff;padding:24px 40px 22px 76px;
+.card{flex:1 1 0;min-height:0;border-radius:44px;position:relative;display:flex;align-items:center;justify-content:flex-start;padding:36px}
+.card>svg{width:52%;height:100%}
+.card.wide>svg{width:100%}
+.tag{position:absolute;right:40px;top:50%;margin-top:-118px;transform:rotate(-4deg);background:var(--tag);color:#fff;padding:24px 40px 22px 76px;
   clip-path:polygon(34px 0,100% 0,100% 100%,34px 100%,0 50%);display:flex;flex-direction:column;align-items:flex-start}
 .tag::before{content:"";position:absolute;left:38px;top:50%;width:20px;height:20px;margin-top:-10px;border-radius:50%;background:var(--bg)}
-.tag b{font-family:var(--display);font-weight:400;font-size:116px;line-height:1}
+.tag b{font-family:var(--display);font-weight:400;font-size:88px;line-height:1}
 .tag span{font:600 40px/1.15 var(--mono);letter-spacing:.04em}
 .txt{flex:none;display:flex;flex-direction:column;gap:14px}
 .lbl{font:600 40px/1 var(--mono);letter-spacing:.08em;color:var(--tag);text-transform:uppercase}
@@ -35,16 +36,19 @@ h1{font-family:var(--display);font-weight:400;font-size:92px;line-height:1.02;ma
 /* pack */
 .top{flex:none;display:flex;gap:30px;align-items:center}
 .top .txt{flex:1}
-.top .ill{width:300px;height:300px;flex:none;border-radius:40px;padding:26px}
+.top h1{font-size:84px;line-height:.98}
+.top .arl{font-size:48px}
+.top .ill{width:280px;height:280px;flex:none;border-radius:40px;padding:26px}
 .top .ill svg{width:100%;height:100%}
 ol{margin:0;padding:22px 40px;list-style:none;background:#fff;border:5px solid var(--fg);border-radius:30px;counter-reset:n;flex:none}
-ol li{counter-increment:n;font:500 44px/1.2 var(--body);padding:13px 0;display:flex;gap:24px;align-items:baseline;border-bottom:3px dashed var(--line)}
+ol li{counter-increment:n;font:500 44px/1.2 var(--body);padding:${H>1500?18:9}px 0;display:flex;gap:24px;align-items:baseline;border-bottom:3px dashed var(--line)}
 ol li:last-child{border-bottom:0}
 ol li::before{content:counter(n);font:600 40px/1 var(--mono);color:var(--tag);width:30px;flex:none}
 .prow{flex:none;display:flex;align-items:center;justify-content:space-between;gap:30px}
 .prow .arl{flex:1}
-.prow .tag{position:relative;right:auto;bottom:auto;flex:none}
-.prow .tag b{font-size:96px}
+.prow .tag{position:relative;right:auto;top:auto;margin:0;flex:none}
+.prow .tag b{font-size:80px}
+.prow .arl{font-size:48px;line-height:1.4}
 .sp{flex:1 1 0}
 `;
 const icoCash = `<svg viewBox="0 0 64 64"><rect x="4" y="16" width="56" height="32" rx="6" fill="#eef5e4" stroke="#17181c" stroke-width="5"/><circle cx="32" cy="32" r="8" fill="none" stroke="#17181c" stroke-width="4"/></svg>`;
@@ -58,7 +62,7 @@ const page = (W, H, PT, PB, body) => `<!doctype html><html lang="fr"><head><meta
 // ---------- content ----------
 const general = [
   { f: "01-launch", lbl: "C'est ouvert", h: "3achra est ouverte&nbsp;!", fx: "Tout à 9,900 DT, livré partout en Tunisie.", ar: "حلّينا! عشرة وصلت، وكل شي بـ 9,900 DT", art: A.bag, tint: "var(--t1)" },
-  { f: "02-tout-a-9900", lbl: "Un seul prix", h: "Tout à 9,900&nbsp;DT.", fx: "Cuisine, maison, beauté, téléphone… pas de calcul.", ar: "ما تحسبش، ما تسألش «قدّاش هاذي؟»", art: A.grid6, vb: "0 0 400 290", tint: "#fff" },
+  { f: "02-tout-a-9900", lbl: "Un seul prix", h: "Tout à 9,900&nbsp;DT.", fx: "Cuisine, maison, beauté, téléphone… pas de calcul.", ar: "ما تحسبش، ما تسألش «قدّاش هاذي؟»", art: A.grid6, tint: "#fff" },
   { f: "03-livraison-gratuite-5-articles", lbl: "Livraison", h: "Livraison gratuite dès 5&nbsp;articles", fx: "5 × 9,900 = 49,500 DT, livraison offerte.", ar: "خوذ 5 حوايج ولا أكثر والتوصيل علينا", art: A.truck, tint: "var(--t2)", noTag: true },
   { f: "04-paiement-a-la-livraison", lbl: "Zéro risque", h: "Paiement à la livraison", fx: "Vous voyez le colis, vous payez au livreur.", ar: "ما تخلّص حتى مليم قبل ما توصلك", art: A.cash, tint: "var(--t3)" },
 ];
@@ -124,7 +128,7 @@ function pack(d, W, H, PT, PB) {
     const chk = await pg.evaluate(() => {
       const out = [];
       if (!document.fonts.check('40px "Archivo Black"')) out.push("Archivo Black not loaded (fallback used)");
-      if (!document.fonts.check('40px "IBM Plex Sans Arabic"', "عشرة")) out.push("Plex Arabic not loaded");
+      if (!document.fonts.check('600 40px "IBM Plex Sans Arabic"', "عشرة")) out.push("Plex Arabic not loaded");
       const fr = document.querySelector(".fr");
       if (fr.scrollHeight > fr.clientHeight + 1) out.push(`content overflows by ${fr.scrollHeight - fr.clientHeight}px`);
       const card = document.querySelector(".card");
