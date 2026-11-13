@@ -76,6 +76,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .ph{aspect-ratio:1/1;max-width:100%;position:relative;display:flex;align-items:flex-end;padding:14px;font-family:var(--display);font-size:clamp(17px,2.4vw,22px);line-height:1.05;overflow:hidden}
+.ph .art{position:absolute;inset:14% 12% 22% 12%;display:flex;align-items:center;justify-content:center}
+.ph .art svg{width:100%;height:100%}
+.ph .nm{position:relative;font-size:clamp(14px,1.9vw,17px)}
 .ph em{position:absolute;top:10px;left:10px;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:var(--muted)}
 .ph .mini{position:absolute;top:10px;right:10px;background:var(--tag);color:var(--tag-ink);font:600 12px var(--mono);padding:3px 8px;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);padding-left:12px}
 .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
@@ -177,6 +180,7 @@ const CONFIG = {
   price: 9.9, delivery: 7, freeFrom: 5, packPrice: 49.5
 };
 /* ================================== */
+const ART = __ART__;
 const PRODUCTS = __DATA__.map((p,i)=>({id:i+1,cat:p[0],name:p[1],desc:p[2],opts:Array.isArray(p[5])?p[5]:null}));
 const PACKS = [
   {id:"p1",name:"Pack Hiver",items:[1,2,3,4,5]},
@@ -217,7 +221,7 @@ function renderGrid(){
   const list=PRODUCTS.filter(p=>filter==="Tout"||p.cat===filter);
   $('nshown').textContent=list.length+' articles';
   $('grid').innerHTML=list.map(p=>`<article class="card">
-    <div class="ph" style="background:var(${TINT[p.cat]||'--t2'})"><em>${p.cat}</em><span class="mini">9,900</span>${esc(short(p.name))}</div>
+    <div class="ph" style="background:var(${TINT[p.cat]||'--t2'})"><em>${p.cat}</em><span class="mini">9,900</span>${ART[p.id-1]?`<span class="art" aria-hidden="true">${ART[p.id-1]}</span>`:`<span class="nm">${esc(short(p.name))}</span>`}</div>
     <div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
     ${p.opts?`<select class="vsel" id="variant-${p.id}" aria-label="Modèle de téléphone" data-vsel="${p.id}"><option value="">Choisir le modèle…</option>${p.opts.map(o=>`<option>${esc(o)}</option>`).join('')}</select><p class="verr" id="variant-err-${p.id}" role="alert" hidden>Choisissez d'abord votre modèle.</p>`:''}
     <div class="row"><span class="price">${dt(CONFIG.price)}</span><button class="add" type="button" data-add="${p.id}">Ajouter</button></div></div></article>`).join('');
