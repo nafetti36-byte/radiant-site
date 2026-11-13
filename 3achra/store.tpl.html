@@ -1,5 +1,5 @@
 <title>3achra — Tout à 9,900 DT</title>
-<meta name="description" content="3achra : plus de 30 articles malins à 9,900 DT. Livraison partout en Tunisie, gratuite dès 5 articles. Paiement à la livraison.">
+<meta name="description" content="3achra : plus de 40 articles malins à 9,900 DT : hiver, cuisine, ménage, hijab, téléphone. Livraison partout en Tunisie, gratuite dès 5 articles. Paiement à la livraison.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -83,6 +83,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .card p{margin:0;font-size:12.5px;color:var(--muted);flex:1}
 .card .row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .card .add{padding:7px 12px;font-size:13px}
+.vsel{width:100%;max-width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:7px 8px;font-size:13px}
+.vsel.bad{border-color:var(--tag)}
+.verr{margin:0;font-size:12px;color:var(--tag-text)}
 
 footer{border-top:1px solid var(--line);margin-top:24px}
 footer .in{padding-block:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;font-size:13px;color:var(--muted)}
@@ -133,7 +136,7 @@ form.co input,form.co select,form.co textarea{border:1px solid var(--line);backg
 <section class="hero gut"><div class="in">
   <div>
     <h1>Tout à 9,900 DT</h1>
-    <p>Cuisine, maison, beauté, téléphone : 30 petits articles malins à prix unique. Livrés partout en Tunisie, payés à la livraison.</p>
+    <p>Hiver, cuisine, ménage, hijab, téléphone : plus de 40 petits articles malins à prix unique, souvent en lot. Livrés partout en Tunisie, payés à la livraison.</p>
     <p class="ar">كل شي بـ 9,900 — التوصيل بلاش من 5 حاجات والخلاص عند الاستلام</p>
     <div class="perks"><span>Livraison gratuite dès 5 articles</span><span>Paiement à la livraison</span><span>Échange sous 7 jours</span></div>
   </div>
@@ -174,22 +177,30 @@ const CONFIG = {
   price: 9.9, delivery: 7, freeFrom: 5, packPrice: 49.5
 };
 /* ================================== */
-const PRODUCTS = __DATA__.map((p,i)=>({id:i+1,cat:p[0],name:p[1],desc:p[2]}));
+const PRODUCTS = __DATA__.map((p,i)=>({id:i+1,cat:p[0],name:p[1],desc:p[2],opts:Array.isArray(p[5])?p[5]:null}));
 const PACKS = [
-  {id:"p1",name:"Pack Cuisine",items:[1,2,3,4,6]},
-  {id:"p2",name:"Pack Beauté",items:[15,16,17,19,20]},
-  {id:"p3",name:"Pack Maison & Tech",items:[5,8,9,10,11]}
+  {id:"p1",name:"Pack Hiver",items:[1,2,3,4,5]},
+  {id:"p2",name:"Pack Hijab",items:[16,17,18,19,20]},
+  {id:"p3",name:"Pack Cuisine",items:[6,7,8,9,10]},
+  {id:"p4",name:"Pack Ménage",items:[11,12,13,14,15]},
+  {id:"p5",name:"Pack Révision",items:[25,26,27,28,29]},
+  {id:"p6",name:"Pack Ramadan",items:[33,34,35,36,10]}
 ];
 const GOV = ["Ariana","Béja","Ben Arous","Bizerte","Gabès","Gafsa","Jendouba","Kairouan","Kasserine","Kébili","Le Kef","Mahdia","La Manouba","Médenine","Monastir","Nabeul","Sfax","Sidi Bouzid","Siliana","Sousse","Tataouine","Tozeur","Tunis","Zaghouan"];
-const TINT = {Cuisine:"--t1",Maison:"--t2",Mobile:"--t5",Beauté:"--t1",Bijoux:"--t4",Voyage:"--t3",Auto:"--t2",Animaux:"--t4",Fun:"--t3"};
+const TINT = {"Hiver":"--t2","Cuisine":"--t1","Ménage":"--t3","Hijab & Cheveux":"--t5","Téléphone":"--t5","Papeterie":"--t2","Auto":"--t3","Ramadan & Maison":"--t4","Animaux":"--t4","Bijoux":"--t4","Fête":"--t1"};
 
 const $=id=>document.getElementById(id);
 const dt=n=>n.toFixed(3).replace('.',',')+' DT';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const short=n=>n.replace(/\s*\(.*\)/,'');
 let cart={}, filter="Tout", view="cart";
-try{cart=JSON.parse(localStorage.getItem('3achra_cart')||'{}')||{}}catch(e){cart={}}
-const save=()=>{try{localStorage.setItem('3achra_cart',JSON.stringify(cart))}catch(e){}};
+const CART_KEY='3achra_cart_v2';
+try{cart=JSON.parse(localStorage.getItem(CART_KEY)||'{}')||{}}catch(e){cart={}}
+const save=()=>{try{localStorage.setItem(CART_KEY,JSON.stringify(cart))}catch(e){}};
+/* cart keys: "p1" = pack, "21" = product, "21|iPhone 13" = product + variant */
+const splitKey=k=>{const i=k.indexOf('|');return i<0?[k,'']:[k.slice(0,i),k.slice(i+1)]};
+const validKey=k=>{if(k.startsWith('p'))return PACKS.some(p=>p.id===k);const[id,v]=splitKey(k),pr=PRODUCTS[+id-1];return !!pr&&(pr.opts?pr.opts.includes(v):!v)};
+for(const k in cart){if(!validKey(k)||!(cart[k]>0))delete cart[k]}
 
 function itemsCount(){let n=0;for(const k in cart){n+=cart[k]*(k.startsWith('p')?5:1)}return n}
 function subtotal(){let s=0;for(const k in cart){s+=cart[k]*(k.startsWith('p')?CONFIG.packPrice:CONFIG.price)}return s}
@@ -208,9 +219,10 @@ function renderGrid(){
   $('grid').innerHTML=list.map(p=>`<article class="card">
     <div class="ph" style="background:var(${TINT[p.cat]||'--t2'})"><em>${p.cat}</em><span class="mini">9,900</span>${esc(short(p.name))}</div>
     <div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
+    ${p.opts?`<select class="vsel" id="variant-${p.id}" aria-label="Modèle de téléphone" data-vsel="${p.id}"><option value="">Choisir le modèle…</option>${p.opts.map(o=>`<option>${esc(o)}</option>`).join('')}</select><p class="verr" id="variant-err-${p.id}" role="alert" hidden>Choisissez d'abord votre modèle.</p>`:''}
     <div class="row"><span class="price">${dt(CONFIG.price)}</span><button class="add" type="button" data-add="${p.id}">Ajouter</button></div></div></article>`).join('');
 }
-function nameOf(k){return k.startsWith('p')?PACKS.find(p=>p.id===k).name+' (5 articles)':PRODUCTS[+k-1].name}
+function nameOf(k){if(k.startsWith('p'))return PACKS.find(p=>p.id===k).name+' (5 articles)';const[id,v]=splitKey(k);return PRODUCTS[+id-1].name+(v?' — Modèle : '+v:'')}
 function unit(k){return k.startsWith('p')?CONFIG.packPrice:CONFIG.price}
 
 function shipBox(){
@@ -229,8 +241,8 @@ function renderCart(){
   const keys=Object.keys(cart);
   if(view==="cart"){
     $('dTitle').textContent="Votre panier";
-    $('dbody').innerHTML=keys.length? shipBox()+keys.map(k=>`<div class="line"><div class="n">${esc(nameOf(k))}<small>${dt(unit(k))}</small></div>
-      <div class="qty"><button type="button" data-dec="${k}" aria-label="Retirer un">−</button><span>${cart[k]}</span><button type="button" data-inc="${k}" aria-label="Ajouter un">+</button></div></div>`).join('')+sumBox()
+    $('dbody').innerHTML=keys.length? shipBox()+keys.map(k=>{const[id,v]=splitKey(k);return `<div class="line"><div class="n">${esc(k.startsWith('p')?nameOf(k):PRODUCTS[+id-1].name)}${v?`<small>Modèle : ${esc(v)}</small>`:''}<small>${dt(unit(k))}</small></div>
+      <div class="qty"><button type="button" data-dec="${esc(k)}" aria-label="Retirer un">−</button><span>${cart[k]}</span><button type="button" data-inc="${esc(k)}" aria-label="Ajouter un">+</button></div></div>`}).join('')+sumBox()
       : `<p class="empty">Votre panier est vide.<br>Tout est à 9,900 DT : servez-vous !</p>`;
     $('dfoot').innerHTML=keys.length?`<button class="big" type="button" id="toCheckout">Commander · paiement à la livraison</button><button class="ghost" type="button" id="keep">Continuer mes achats</button>`:`<button class="big" type="button" id="keep">Voir les articles</button>`;
   } else if(view==="checkout"){
@@ -260,7 +272,16 @@ function confirmOrder(){
   $('dbody').innerHTML=`<p>Envoyez votre commande sur WhatsApp pour la valider. Nous vous appelons ensuite pour confirmer la livraison.</p><div class="recap">${esc(txt)}</div>`;
   $('dfoot').innerHTML=`<a class="big" href="${url}" target="_blank" rel="noopener">Envoyer la commande sur WhatsApp</a><button class="ghost" type="button" id="newOrder">Terminé · vider le panier</button>`;
 }
-function add(k){cart[k]=(cart[k]||0)+1;save();renderCart();if($('drawer').hidden)toast(k.startsWith('p')?'Pack ajouté au panier':'Ajouté au panier');
+function add(btnKey){
+  let k=btnKey;
+  const pr=k.startsWith('p')?null:PRODUCTS[+k-1];
+  if(pr&&pr.opts){
+    const sel=$('variant-'+pr.id), err=$('variant-err-'+pr.id);
+    if(!sel.value){err.hidden=false;sel.classList.add('bad');sel.focus();return}
+    err.hidden=true;sel.classList.remove('bad');k=pr.id+'|'+sel.value;
+  }
+  cart[k]=(cart[k]||0)+1;save();renderCart();if($('drawer').hidden)toast(k.startsWith('p')?'Pack ajouté au panier':'Ajouté au panier');
+  k=btnKey;
   document.querySelectorAll(`[data-add="${k}"]`).forEach(b=>{b.classList.add('done');b.textContent='✓ Ajouté';setTimeout(()=>{b.classList.remove('done');b.textContent=k.startsWith('p')?'Ajouter le pack':'Ajouter'},1200)})}
 let tt;function toast(m){const t=$('toast');t.textContent=m+` · ${itemsCount()} article${itemsCount()>1?'s':''}`;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,1800)}
 function open(v){view=v||"cart";$('drawer').hidden=false;$('scrim').hidden=false;renderCart()}
@@ -280,6 +301,7 @@ document.addEventListener('click',e=>{
   else if(t.id==='newOrder'){cart={};save();close();renderCart()}
 });
 $('scrim').addEventListener('click',close);
+document.addEventListener('change',e=>{const s=e.target.closest('[data-vsel]');if(s&&s.value){s.classList.remove('bad');$('variant-err-'+s.dataset.vsel).hidden=true}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('drawer').hidden)close()});
 $('waShow').textContent='+'+CONFIG.whatsapp;
 renderPacks();renderGrid();renderCart();

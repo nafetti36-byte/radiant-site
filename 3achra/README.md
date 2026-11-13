@@ -6,9 +6,9 @@ Orders are sent to the shop's WhatsApp, so the site works with no backend.
 ## Files
 - `index.html` — the finished website (open it in a browser or host it anywhere).
 - `store.tpl.html` — the source page. Edit this, not index.html.
-- `products.json` — the 30 products: [category, name, description, China price USD, weight g].
-- `build.py` — run `python3 build.py` after editing to rebuild `index.html`.
-- `3achra-products-shopify.csv` — the same 30 products for Shopify (Products → Import).
+- `products.json` — the 44 products: [category, name, description, China price USD, weight g, optional list of variants such as phone models].
+- `build.py` — run `python3 build.py` after editing to rebuild `index.html` and the Shopify CSV.
+- `3achra-products-shopify.csv` — the same products for Shopify (Products → Import); `build.py` regenerates it.
 
 ## Before going live
 1. In `store.tpl.html`, set `CONFIG.whatsapp` to your WhatsApp number (country code + number, digits only), then run `python3 build.py`.
