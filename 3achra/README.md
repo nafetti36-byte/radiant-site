@@ -11,6 +11,6 @@ Orders are sent to the shop's WhatsApp, so the site works with no backend.
 - `3achra-products-shopify.csv` — the same 30 products for Shopify (Products → Import).
 
 ## Before going live
-1. In `store.tpl.html`, set `CONFIG.whatsapp` to your WhatsApp number (216 + 8 digits), then run `python3 build.py`.
+1. In `store.tpl.html`, set `CONFIG.whatsapp` to your WhatsApp number (country code + number, digits only), then run `python3 build.py`.
 2. Replace the coloured product tiles with your own product photos.
 3. Host it (Vercel, Netlify or GitHub Pages) and connect a domain like 3achra.tn.

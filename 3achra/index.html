@@ -178,7 +178,7 @@ form.co input,form.co select,form.co textarea{border:1px solid var(--line);backg
 <script>
 /* ===== SETTINGS: change these ===== */
 const CONFIG = {
-  whatsapp: "21600000000",   // your WhatsApp number, country code first, digits only (216 + 8 digits)
+  whatsapp: "966560680058",   // your WhatsApp number, country code first, digits only
   price: 9.9, delivery: 7, freeFrom: 5, packPrice: 49.5
 };
 /* ================================== */
@@ -289,7 +289,7 @@ document.addEventListener('click',e=>{
 });
 $('scrim').addEventListener('click',close);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('drawer').hidden)close()});
-$('waShow').textContent='+'+CONFIG.whatsapp.replace(/^216/,'216 ');
+$('waShow').textContent='+'+CONFIG.whatsapp;
 renderPacks();renderGrid();renderCart();
 </script>
 
