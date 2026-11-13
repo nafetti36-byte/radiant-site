@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3achra — Tout à 9,900 DT</title>
+<meta name="description" content="3achra : plus de 30 articles malins à 9,900 DT. Livraison partout en Tunisie, gratuite dès 5 articles. Paiement à la livraison.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: sticky header with cart, price-tag hero, packs row, filterable product grid, slide-in cart + COD checkout */
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --fg:#17181c; --muted:#62656d; --line:#e2e0da;
+  --tag:#e8361f; --tag-ink:#ffffff; --tag-soft:#fde9e5; --tag-text:#b42512; --ok:#1f7a4d; --scrim:rgba(20,20,24,.45);
+  --t1:#fde9e5; --t2:#e5f0f8; --t3:#eef5e4; --t4:#f6eddc; --t5:#efe8f7;
+  --display:"Archivo Black","Arial Black",system-ui,sans-serif;
+  --body:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --ar:"IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121317; --surface:#1b1d23; --fg:#ececef; --muted:#a2a5ae; --line:#2c2f37;
+  --tag:#ff5a3f; --tag-ink:#14151a; --tag-soft:#2d1a16; --tag-text:#ff8a74; --ok:#4cc38a; --scrim:rgba(0,0,0,.6);
+  --t1:#2d1a16; --t2:#16232e; --t3:#1c2617; --t4:#2a2316; --t5:#231c2d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --fg:#ececef; --muted:#a2a5ae; --line:#2c2f37;
+  --tag:#ff5a3f; --tag-ink:#14151a; --tag-soft:#2d1a16; --tag-text:#ff8a74; --ok:#4cc38a; --scrim:rgba(0,0,0,.6);
+  --t1:#2d1a16; --t2:#16232e; --t3:#1c2617; --t4:#2a2316; --t5:#231c2d; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--body);margin:0}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:1120px;margin:0 auto}
+h1,h2,h3{margin:0;line-height:1.1;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+.ar{font-family:var(--ar);direction:rtl}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .in{display:flex;align-items:center;gap:16px;padding-block:12px}
+.logo{font-family:var(--display);font-size:26px;letter-spacing:-.01em;text-decoration:none;color:var(--fg);display:flex;align-items:center;gap:8px}
+.logo i{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:600;background:var(--tag);color:var(--tag-ink);padding:2px 7px;border-radius:4px}
+.top .sp{flex:1}
+.topnote{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.topnote{display:none}}
+.cartbtn{display:flex;align-items:center;gap:8px;border:0;background:var(--fg);color:var(--bg);border-radius:99px;padding:8px 16px;font-weight:600}
+.cartbtn b{font-family:var(--mono);background:var(--tag);color:var(--tag-ink);border-radius:99px;min-width:22px;padding:0 6px;text-align:center;font-size:13px}
+
+.hero .in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center;padding-block:40px 32px}
+@media (max-width:720px){.hero .in{grid-template-columns:minmax(0,1fr)}}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,7vw,72px)}
+.hero p{max-width:56ch;color:var(--muted);font-size:17px;margin:12px 0 0}
+.hero .ar{font-size:19px;margin-top:6px}
+.perks{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.perks span{font-size:13px;font-weight:500;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:5px 12px}
+.pricetag{background:var(--tag);color:var(--tag-ink);padding:22px 30px 18px 44px;position:relative;transform:rotate(-4deg);justify-self:start;
+  clip-path:polygon(20px 0,100% 0,100% 100%,20px 100%,0 50%)}
+.pricetag::before{content:"";position:absolute;left:24px;top:50%;width:11px;height:11px;margin-top:-5px;border-radius:50%;background:var(--bg)}
+.pricetag b{display:block;font-family:var(--display);font-size:60px;line-height:1;font-weight:400}
+.pricetag span{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em}
+
+.sec{padding-block:24px}
+.sec h2{font-family:var(--display);font-weight:400;font-size:24px;margin-bottom:14px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec h2 small{font:500 13px var(--body);color:var(--muted)}
+.packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.pack{background:var(--surface);border:2px solid var(--fg);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.pack h3{font-size:18px}
+.pack ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px}
+.pack .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto}
+.price{font:600 18px var(--mono);font-variant-numeric:tabular-nums}
+.price s{color:var(--muted);font-size:13px;font-weight:500;margin-left:6px}
+.add{border:0;background:var(--tag);color:var(--tag-ink);border-radius:8px;padding:8px 14px;font-weight:600;white-space:nowrap}
+.add.done{background:var(--ok);color:var(--surface)}
+
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin}
+.filters button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+@media (max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ph{aspect-ratio:1/1;max-width:100%;position:relative;display:flex;align-items:flex-end;padding:14px;font-family:var(--display);font-size:clamp(17px,2.4vw,22px);line-height:1.05;overflow:hidden}
+.ph em{position:absolute;top:10px;left:10px;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:var(--muted)}
+.ph .mini{position:absolute;top:10px;right:10px;background:var(--tag);color:var(--tag-ink);font:600 12px var(--mono);padding:3px 8px;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);padding-left:12px}
+.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font:600 14px/1.35 var(--body)}
+.card p{margin:0;font-size:12.5px;color:var(--muted);flex:1}
+.card .row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.card .add{padding:7px 12px;font-size:13px}
+
+footer{border-top:1px solid var(--line);margin-top:24px}
+footer .in{padding-block:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;font-size:13px;color:var(--muted)}
+footer b{color:var(--fg);display:block;margin-bottom:4px}
+
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);z-index:50;display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px);box-shadow:-8px 0 30px rgba(0,0,0,.15)}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dhead h2{font-family:var(--display);font-weight:400;font-size:22px}
+.x{border:1px solid var(--line);background:var(--bg);border-radius:8px;width:36px;height:36px;font-size:18px}
+.dbody{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.ship{background:var(--tag-soft);border-radius:10px;padding:12px 14px;font-size:14px}
+.ship b{color:var(--tag-text)}
+.bar{height:8px;background:var(--surface);border-radius:99px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tag);border-radius:99px;transition:width .3s}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.line .n{font-weight:600;font-size:14px}
+.line .n small{display:block;color:var(--muted);font-weight:400}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:30px;height:30px;border:1px solid var(--line);background:var(--bg);border-radius:8px;font-weight:600}
+.qty span{font-family:var(--mono);min-width:20px;text-align:center}
+.sum{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.sum div{display:flex;justify-content:space-between}
+.sum .tot{font-weight:600;font-size:17px;padding-top:6px;border-top:1px solid var(--line);margin-top:4px}
+.sum .tot span:last-child,.sum span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+form.co{display:flex;flex-direction:column;gap:10px}
+form.co label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500}
+form.co input,form.co select,form.co textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 12px;width:100%}
+.err{color:var(--tag-text);font-size:13px}
+.dfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.big{border:0;background:var(--tag);color:var(--tag-ink);border-radius:10px;padding:14px;font-weight:600;font-size:16px;width:100%;text-align:center;text-decoration:none;display:block}
+.ghost{border:1px solid var(--line);background:transparent;border-radius:10px;padding:10px;font-weight:500;width:100%}
+.recap{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;font-family:var(--mono);overflow-wrap:anywhere}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;z-index:60}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="top gut"><div class="in">
+  <a class="logo" href="#top">3achra <i>9,900</i></a>
+  <span class="sp"></span>
+  <span class="topnote">Paiement à la livraison · Livraison 24 gouvernorats</span>
+  <button class="cartbtn" id="openCart" type="button">Panier <b id="count">0</b></button>
+</div></header>
+
+<main id="top">
+<section class="hero gut"><div class="in">
+  <div>
+    <h1>Tout à 9,900 DT</h1>
+    <p>Cuisine, maison, beauté, téléphone : 30 petits articles malins à prix unique. Livrés partout en Tunisie, payés à la livraison.</p>
+    <p class="ar">كل شي بـ 9,900 — التوصيل بلاش من 5 حاجات والخلاص عند الاستلام</p>
+    <div class="perks"><span>Livraison gratuite dès 5 articles</span><span>Paiement à la livraison</span><span>Échange sous 7 jours</span></div>
+  </div>
+  <div class="pricetag" aria-hidden="true"><span>PRIX UNIQUE</span><b>9,900</b><span>DT · كل شي</span></div>
+</div></section>
+
+<section class="sec gut"><div class="in">
+  <h2>Packs 5 articles <small>49,500 DT · livraison gratuite</small></h2>
+  <div class="packs" id="packs"></div>
+</div></section>
+
+<section class="sec gut" id="shop"><div class="in">
+  <h2>Tous les articles <small id="nshown"></small></h2>
+  <div class="filters" id="filters" role="group" aria-label="Catégories"></div>
+  <div class="grid" id="grid"></div>
+</div></section>
+</main>
+
+<footer class="gut"><div class="in">
+  <div><b>3achra</b>Tout à 9,900 DT. Boutique tunisienne en ligne.</div>
+  <div><b>Livraison</b>7 DT, gratuite dès 5 articles. 24 à 72 h selon le gouvernorat.</div>
+  <div><b>Paiement</b>En espèces à la livraison. Nous confirmons chaque commande par téléphone.</div>
+  <div><b>Contact</b>WhatsApp : <span id="waShow"></span></div>
+</div></footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Panier">
+  <div class="dhead"><h2 id="dTitle">Votre panier</h2><button class="x" id="closeCart" type="button" aria-label="Fermer">×</button></div>
+  <div class="dbody" id="dbody"></div>
+  <div class="dfoot" id="dfoot"></div>
+</aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ===== SETTINGS: change these ===== */
+const CONFIG = {
+  whatsapp: "21600000000",   // your WhatsApp number, country code first, digits only (216 + 8 digits)
+  price: 9.9, delivery: 7, freeFrom: 5, packPrice: 49.5
+};
+/* ================================== */
+const PRODUCTS = [["Cuisine", "Couvercles silicone extensibles (lot de 6)", "Couvrent bols, boîtes et fruits coupés. Remplacent le film plastique, lavables et réutilisables.", "0.5–0.9", 90], ["Cuisine", "Filtre d'évier silicone pliable", "Retient les déchets, évite les bouchons. Se plie et se nettoie en 2 secondes.", "0.3–0.6", 60], ["Cuisine", "Pinces de fermeture pour sachets (lot de 12)", "Gardent pâtes, café et chips bien fermés et frais.", "0.4–0.8", 80], ["Cuisine", "Ouvre-bocal antidérapant", "Ouvre tous les bocaux sans effort. Idéal pour les parents et grands-parents.", "0.3–0.6", 50], ["Maison", "Crochets adhésifs transparents (lot de 10)", "Tiennent jusqu'à 5 kg, sans percer le mur. Cuisine, salle de bain, entrée.", "0.4–0.8", 70], ["Maison", "Porte-éponge d'évier avec égouttoir", "Éponge toujours sèche, évier propre et rangé.", "0.4–0.8", 80], ["Maison", "Brosse de nettoyage pour rainures et fenêtres", "Nettoie rails de fenêtres, joints et coins difficiles.", "0.3–0.6", 60], ["Maison", "Organisateur de tiroir (lot de 4 cases)", "Cases modulables pour couverts, maquillage ou bureau.", "0.6–1.0", 150], ["Maison", "Rouleau anti-peluches + 2 recharges", "Vêtements, canapé et sièges de voiture sans poils ni peluches.", "0.5–0.9", 150], ["Mobile", "Support téléphone pliable pour bureau", "Regardez vos vidéos et appels mains libres. Angle réglable.", "0.4–0.8", 70], ["Mobile", "Clips organisateurs de câbles (lot de 10)", "Fini les câbles qui tombent derrière le bureau.", "0.3–0.6", 40], ["Mobile", "Protège-câbles de chargeur (lot de 4)", "Prolongent la vie de vos câbles de charge.", "0.2–0.4", 20], ["Mobile", "Support téléphone voiture pour grille d'aération", "GPS toujours visible, installation en 5 secondes.", "0.6–1.0", 60], ["Mobile", "Anneau support de téléphone", "Meilleure prise en main et sert de pied pour vidéos.", "0.2–0.4", 15], ["Beauté", "Pinces à cheveux crabe (lot de 4)", "Coiffure rapide et tenue toute la journée. Couleurs tendance.", "0.5–0.9", 80], ["Beauté", "Chouchous en satin (lot de 6)", "Doux pour les cheveux, ne laissent pas de marques.", "0.4–0.8", 40], ["Beauté", "Bandeau éponge pour soins du visage", "Idéal pour le maquillage et la routine skincare.", "0.3–0.6", 40], ["Beauté", "Set de 5 pinceaux de maquillage", "Teint, poudre, yeux : l'essentiel pour débuter.", "0.6–1.0", 60], ["Beauté", "Miroir de poche pliable double face", "Normal + grossissant, tient dans tous les sacs.", "0.3–0.6", 50], ["Bijoux", "Boucles d'oreilles en acier inoxydable", "Ne noircissent pas, hypoallergéniques. Emballage cadeau.", "0.3–0.7", 10], ["Bijoux", "Chaîne de cheville fine", "Le petit détail de l'été. Réglable.", "0.2–0.5", 10], ["Voyage", "Flacons de voyage en silicone (lot de 4)", "Shampoing, gel douche, crème : sans fuite en valise.", "0.6–1.0", 80], ["Voyage", "Sac à chaussures de voyage", "Garde vos vêtements propres dans la valise.", "0.3–0.6", 40], ["Voyage", "Porte-cartes et badge", "Cartes bancaires, carte d'identité, badge : tout au même endroit.", "0.3–0.6", 30], ["Auto", "Crochets d'appui-tête voiture (lot de 2)", "Sacs de courses et sacs à main bien accrochés.", "0.2–0.5", 40], ["Auto", "Porte-lunettes pour pare-soleil", "Vos lunettes toujours à portée de main en conduisant.", "0.2–0.4", 15], ["Animaux", "Jouet plume pour chat", "Des heures de jeu pour votre chat.", "0.3–0.6", 30], ["Animaux", "Brosse de toilettage pour animaux", "Enlève les poils morts, pour chiens et chats.", "0.5–0.9", 80], ["Fun", "Stickers pour bouteilles et ordinateurs (lot de 50)", "Personnalisez gourdes, laptops et cahiers.", "0.4–0.8", 60], ["Fun", "Porte-clés figurines", "Petit cadeau parfait pour toute la famille.", "0.2–0.5", 20]].map((p,i)=>({id:i+1,cat:p[0],name:p[1],desc:p[2]}));
+const PACKS = [
+  {id:"p1",name:"Pack Cuisine",items:[1,2,3,4,6]},
+  {id:"p2",name:"Pack Beauté",items:[15,16,17,19,20]},
+  {id:"p3",name:"Pack Maison & Tech",items:[5,8,9,10,11]}
+];
+const GOV = ["Ariana","Béja","Ben Arous","Bizerte","Gabès","Gafsa","Jendouba","Kairouan","Kasserine","Kébili","Le Kef","Mahdia","La Manouba","Médenine","Monastir","Nabeul","Sfax","Sidi Bouzid","Siliana","Sousse","Tataouine","Tozeur","Tunis","Zaghouan"];
+const TINT = {Cuisine:"--t1",Maison:"--t2",Mobile:"--t5",Beauté:"--t1",Bijoux:"--t4",Voyage:"--t3",Auto:"--t2",Animaux:"--t4",Fun:"--t3"};
+
+const $=id=>document.getElementById(id);
+const dt=n=>n.toFixed(3).replace('.',',')+' DT';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const short=n=>n.replace(/\s*\(.*\)/,'');
+let cart={}, filter="Tout", view="cart";
+try{cart=JSON.parse(localStorage.getItem('3achra_cart')||'{}')||{}}catch(e){cart={}}
+const save=()=>{try{localStorage.setItem('3achra_cart',JSON.stringify(cart))}catch(e){}};
+
+function itemsCount(){let n=0;for(const k in cart){n+=cart[k]*(k.startsWith('p')?5:1)}return n}
+function subtotal(){let s=0;for(const k in cart){s+=cart[k]*(k.startsWith('p')?CONFIG.packPrice:CONFIG.price)}return s}
+function shipping(){const n=itemsCount();return n===0||n>=CONFIG.freeFrom?0:CONFIG.delivery}
+
+function renderPacks(){
+  $('packs').innerHTML=PACKS.map(p=>`<div class="pack"><h3>${p.name}</h3>
+    <ul>${p.items.map(i=>`<li>${esc(short(PRODUCTS[i-1].name))}</li>`).join('')}</ul>
+    <div class="row"><span class="price">${dt(CONFIG.packPrice)}</span><button class="add" type="button" data-add="${p.id}">Ajouter le pack</button></div></div>`).join('');
+}
+function renderGrid(){
+  const cats=["Tout",...new Set(PRODUCTS.map(p=>p.cat))];
+  $('filters').innerHTML=cats.map(c=>`<button type="button" aria-pressed="${c===filter}" data-f="${c}">${c}</button>`).join('');
+  const list=PRODUCTS.filter(p=>filter==="Tout"||p.cat===filter);
+  $('nshown').textContent=list.length+' articles';
+  $('grid').innerHTML=list.map(p=>`<article class="card">
+    <div class="ph" style="background:var(${TINT[p.cat]||'--t2'})"><em>${p.cat}</em><span class="mini">9,900</span>${esc(short(p.name))}</div>
+    <div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
+    <div class="row"><span class="price">${dt(CONFIG.price)}</span><button class="add" type="button" data-add="${p.id}">Ajouter</button></div></div></article>`).join('');
+}
+function nameOf(k){return k.startsWith('p')?PACKS.find(p=>p.id===k).name+' (5 articles)':PRODUCTS[+k-1].name}
+function unit(k){return k.startsWith('p')?CONFIG.packPrice:CONFIG.price}
+
+function shipBox(){
+  const n=itemsCount(), left=Math.max(0,CONFIG.freeFrom-n), pct=Math.min(100,n/CONFIG.freeFrom*100);
+  return `<div class="ship">${left>0?`Ajoutez encore <b>${left} article${left>1?'s':''}</b> pour la livraison gratuite.`:`<b>Livraison gratuite</b> sur votre commande.`}<div class="bar"><i style="width:${pct}%"></i></div></div>`;
+}
+function sumBox(){
+  const st=subtotal(), sh=shipping();
+  return `<div class="sum"><div><span>${itemsCount()} articles</span><span>${dt(st)}</span></div>
+    <div><span>Livraison</span><span>${sh?dt(sh):'Gratuite'}</span></div>
+    <div class="tot"><span>Total à payer à la livraison</span><span>${dt(st+sh)}</span></div></div>`;
+}
+function renderCart(){
+  $('count').textContent=itemsCount();
+  if($('drawer').hidden) return;
+  const keys=Object.keys(cart);
+  if(view==="cart"){
+    $('dTitle').textContent="Votre panier";
+    $('dbody').innerHTML=keys.length? shipBox()+keys.map(k=>`<div class="line"><div class="n">${esc(nameOf(k))}<small>${dt(unit(k))}</small></div>
+      <div class="qty"><button type="button" data-dec="${k}" aria-label="Retirer un">−</button><span>${cart[k]}</span><button type="button" data-inc="${k}" aria-label="Ajouter un">+</button></div></div>`).join('')+sumBox()
+      : `<p class="empty">Votre panier est vide.<br>Tout est à 9,900 DT : servez-vous !</p>`;
+    $('dfoot').innerHTML=keys.length?`<button class="big" type="button" id="toCheckout">Commander · paiement à la livraison</button><button class="ghost" type="button" id="keep">Continuer mes achats</button>`:`<button class="big" type="button" id="keep">Voir les articles</button>`;
+  } else if(view==="checkout"){
+    $('dTitle').textContent="Vos coordonnées";
+    $('dbody').innerHTML=`${sumBox()}<form class="co" id="coForm" novalidate>
+      <label for="fName">Nom et prénom<input id="fName" autocomplete="name" required></label>
+      <label for="fPhone">Téléphone (8 chiffres)<input id="fPhone" inputmode="numeric" autocomplete="tel" placeholder="ex. 22 123 456" required></label>
+      <label for="fGov">Gouvernorat<select id="fGov" required><option value="">Choisir…</option>${GOV.map(g=>`<option>${g}</option>`).join('')}</select></label>
+      <label for="fAddr">Adresse complète (ville, rue, repère)<textarea id="fAddr" rows="2" required></textarea></label>
+      <p class="err" id="fErr" hidden></p></form>`;
+    $('dfoot').innerHTML=`<button class="big" type="button" id="confirm">Confirmer la commande · ${dt(subtotal()+shipping())}</button><button class="ghost" type="button" id="back">Retour au panier</button>`;
+  }
+}
+function orderText(f){
+  const lines=Object.keys(cart).map(k=>`- ${cart[k]} × ${nameOf(k)}`).join('\n');
+  const sh=shipping();
+  return `Nouvelle commande 3achra\n\n${lines}\n\nArticles : ${itemsCount()}\nLivraison : ${sh?dt(sh):'Gratuite'}\nTOTAL à payer : ${dt(subtotal()+sh)}\n\nNom : ${f.name}\nTél : ${f.phone}\nGouvernorat : ${f.gov}\nAdresse : ${f.addr}`;
+}
+function confirmOrder(){
+  const f={name:$('fName').value.trim(),phone:$('fPhone').value.replace(/\D/g,''),gov:$('fGov').value,addr:$('fAddr').value.trim()};
+  const e=$('fErr');
+  if(!f.name||!f.gov||!f.addr){e.textContent="Remplissez tous les champs.";e.hidden=false;return}
+  if(f.phone.length!==8){e.textContent="Le numéro doit avoir 8 chiffres (ex. 22123456).";e.hidden=false;return}
+  const txt=orderText(f), url=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(txt)}`;
+  view="done";
+  $('dTitle').textContent="Dernière étape";
+  $('dbody').innerHTML=`<p>Envoyez votre commande sur WhatsApp pour la valider. Nous vous appelons ensuite pour confirmer la livraison.</p><div class="recap">${esc(txt)}</div>`;
+  $('dfoot').innerHTML=`<a class="big" href="${url}" target="_blank" rel="noopener">Envoyer la commande sur WhatsApp</a><button class="ghost" type="button" id="newOrder">Terminé · vider le panier</button>`;
+}
+function add(k){cart[k]=(cart[k]||0)+1;save();renderCart();if($('drawer').hidden)toast(k.startsWith('p')?'Pack ajouté au panier':'Ajouté au panier');
+  document.querySelectorAll(`[data-add="${k}"]`).forEach(b=>{b.classList.add('done');b.textContent='✓ Ajouté';setTimeout(()=>{b.classList.remove('done');b.textContent=k.startsWith('p')?'Ajouter le pack':'Ajouter'},1200)})}
+let tt;function toast(m){const t=$('toast');t.textContent=m+` · ${itemsCount()} article${itemsCount()>1?'s':''}`;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,1800)}
+function open(v){view=v||"cart";$('drawer').hidden=false;$('scrim').hidden=false;renderCart()}
+function close(){$('drawer').hidden=true;$('scrim').hidden=true}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,a'); if(!t) return;
+  if(t.dataset.add) add(t.dataset.add);
+  else if(t.dataset.f){filter=t.dataset.f;renderGrid()}
+  else if(t.dataset.inc){cart[t.dataset.inc]++;save();renderCart()}
+  else if(t.dataset.dec){const k=t.dataset.dec;if(--cart[k]<=0)delete cart[k];save();renderCart()}
+  else if(t.id==='openCart') open('cart');
+  else if(t.id==='closeCart'||t.id==='keep') close();
+  else if(t.id==='toCheckout'){view='checkout';renderCart()}
+  else if(t.id==='back'){view='cart';renderCart()}
+  else if(t.id==='confirm') confirmOrder();
+  else if(t.id==='newOrder'){cart={};save();close();renderCart()}
+});
+$('scrim').addEventListener('click',close);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('drawer').hidden)close()});
+$('waShow').textContent='+'+CONFIG.whatsapp.replace(/^216/,'216 ');
+renderPacks();renderGrid();renderCart();
+</script>
+
+</body>
+</html>
