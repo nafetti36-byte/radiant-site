@@ -1,0 +1,339 @@
+<title>3achra Caisse</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: owner's till — KPI strip, goal bar, add-order panel, filterable order list with status chips */
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --fg:#17181c; --muted:#62656d; --line:#e2e0da;
+  --tag:#e8361f; --tag-ink:#ffffff; --soft:#fde9e5; --tag-text:#b42512;
+  --ok:#1f7a4d; --ok-soft:#e3f2ea; --warn:#a15c00; --warn-soft:#fbefd9; --info:#1d5f96; --info-soft:#e5f0f8; --bad:#b42512;
+  --display:"Archivo Black","Arial Black",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121317; --surface:#1b1d23; --fg:#ececef; --muted:#a2a5ae; --line:#2c2f37;
+  --tag:#ff5a3f; --tag-ink:#14151a; --soft:#2d1a16; --tag-text:#ff8a74;
+  --ok:#4cc38a; --ok-soft:#17291f; --warn:#f0b35a; --warn-soft:#2c2414; --info:#6fb3e8; --info-soft:#15232f; --bad:#ff8a74; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --fg:#ececef; --muted:#a2a5ae; --line:#2c2f37;
+  --tag:#ff5a3f; --tag-ink:#14151a; --soft:#2d1a16; --tag-text:#ff8a74;
+  --ok:#4cc38a; --ok-soft:#17291f; --warn:#f0b35a; --warn-soft:#2c2414; --info:#6fb3e8; --info-soft:#15232f; --bad:#ff8a74; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+main{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2{margin:0;line-height:1.1}
+h1{font-family:var(--display);font-weight:400;font-size:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h1 i{font-style:normal;font:600 12px var(--mono);background:var(--tag);color:var(--tag-ink);padding:3px 8px;border-radius:4px}
+h2{font-size:16px;font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 14px;font-size:13px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.note{font-size:13px;color:var(--muted)}
+.banner{border-radius:10px;padding:10px 14px;font-size:14px;background:var(--warn-soft);color:var(--warn)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kpi{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi span{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi strong{font:600 24px var(--mono);font-variant-numeric:tabular-nums}
+.kpi small{font-size:12px;color:var(--muted)}
+.pos{color:var(--ok)} .neg{color:var(--bad)}
+.goal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.goal .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+.bar{height:12px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--tag);border-radius:99px;transition:width .4s}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:500 10px var(--mono)}
+.best{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.best li{display:flex;justify-content:space-between;gap:10px}
+.best b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+form{display:flex;flex-direction:column;gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500}
+input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 11px;width:100%}
+textarea{font:13px/1.45 var(--mono);resize:vertical}
+.fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.btn{border:0;background:var(--tag);color:var(--tag-ink);border-radius:8px;padding:10px 16px;font-weight:600}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:500}
+.err{color:var(--bad);font-size:13px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13px;font-weight:500}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.orders{display:flex;flex-direction:column;gap:10px}
+.order{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
+.order .who{font-weight:600}
+.order .meta{font-size:13px;color:var(--muted)}
+.order .prods{grid-column:1/-1;font-size:13px;white-space:pre-wrap;color:var(--muted);overflow-wrap:anywhere}
+.order .amt{text-align:right;font:600 15px var(--mono);font-variant-numeric:tabular-nums}
+.order .amt small{display:block;font:500 12px var(--mono)}
+.order .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{font:600 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:3px 9px;border:0}
+.st-nouvelle{background:var(--info-soft);color:var(--info)}
+.st-confirmee{background:var(--warn-soft);color:var(--warn)}
+.st-envoyee{background:var(--soft);color:var(--tag-text)}
+.st-livree{background:var(--ok-soft);color:var(--ok)}
+.st-refusee{background:var(--bg);color:var(--bad);text-decoration:line-through}
+.st-annulee{background:var(--bg);color:var(--muted)}
+.acts select{width:auto;padding:5px 8px;font-size:13px}
+.acts .del{margin-left:auto;font-size:12px;color:var(--muted);background:none;border:0;text-decoration:underline}
+.empty{text-align:center;color:var(--muted);padding:28px 12px;border:1px dashed var(--line);border-radius:12px}
+details.settings{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.settings summary{padding:12px 16px;cursor:pointer;font-weight:600}
+details.settings form{padding:0 16px 16px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <div class="top">
+    <h1>3achra <i>CAISSE</i></h1>
+    <div class="seg" role="group" aria-label="Période">
+      <button type="button" data-p="today" aria-pressed="false">Aujourd'hui</button>
+      <button type="button" data-p="7" aria-pressed="false">7 jours</button>
+      <button type="button" data-p="month" aria-pressed="true">Ce mois</button>
+      <button type="button" data-p="all" aria-pressed="false">Tout</button>
+    </div>
+  </div>
+  <p class="banner" id="status" hidden></p>
+
+  <section class="kpis" aria-label="Résumé">
+    <div class="kpi"><span>Commandes</span><strong id="kOrders">0</strong><small id="kOrdersSub">—</small></div>
+    <div class="kpi"><span>Livrées</span><strong id="kDeliv">0</strong><small id="kItems">0 articles</small></div>
+    <div class="kpi"><span>Refus</span><strong id="kRefuse">0 %</strong><small>objectif &lt; 20 %</small></div>
+    <div class="kpi"><span>Encaissé</span><strong id="kCash">0</strong><small>DT, colis livrés</small></div>
+    <div class="kpi"><span>Bénéfice</span><strong id="kProfit">0</strong><small>DT, après pub et frais</small></div>
+    <div class="kpi"><span>Panier moyen</span><strong id="kBasket">0</strong><small>articles / commande</small></div>
+  </section>
+
+  <section class="goal" aria-label="Objectif du mois">
+    <div class="row"><b>Objectif du mois : 5 000 DT de bénéfice</b><span id="gText">0 / 5 000 DT</span></div>
+    <div class="bar"><i id="gBar" style="width:0%"></i></div>
+    <div class="row note"><span id="gPace">—</span><span id="gNeed">—</span></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="addTitle">
+      <h2 id="addTitle">Ajouter une commande</h2>
+      <form id="addForm" novalidate>
+        <label for="fPaste">Collez le message WhatsApp (rempli tout seul)
+          <textarea id="fPaste" rows="4" placeholder="Nouvelle commande 3achra&#10;- 1 × Pack Hiver (5 articles)&#10;…"></textarea></label>
+        <div class="fr">
+          <label for="fName">Nom<input id="fName" autocomplete="off"></label>
+          <label for="fPhone">Téléphone<input id="fPhone" inputmode="numeric" autocomplete="off"></label>
+          <label for="fGov">Gouvernorat<input id="fGov" autocomplete="off"></label>
+        </div>
+        <div class="fr">
+          <label for="fItems">Articles<input id="fItems" type="number" min="1" step="1" value="5"></label>
+          <label for="fDelivery">Livraison payée (DT)<input id="fDelivery" type="number" min="0" step="0.5" value="0"></label>
+          <label for="fDate">Date<input id="fDate" type="date"></label>
+        </div>
+        <label for="fProducts">Produits<textarea id="fProducts" rows="2"></textarea></label>
+        <p class="err" id="fErr" hidden></p>
+        <div><button class="btn" type="submit" id="addBtn">Enregistrer la commande</button></div>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="chartTitle">
+      <h2 id="chartTitle">Commandes des 14 derniers jours</h2>
+      <div class="chart" id="chart"></div>
+      <h2>Meilleurs produits</h2>
+      <ol class="best" id="best"><li class="note">Apparaît après vos premières commandes.</li></ol>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="listTitle">
+    <div class="top"><h2 id="listTitle">Commandes</h2>
+      <div class="filters" id="filters" role="group" aria-label="Filtrer par statut"></div></div>
+    <div class="orders" id="orders"><p class="empty">Chargement des commandes…</p></div>
+  </section>
+
+  <details class="settings">
+    <summary>Réglages des coûts</summary>
+    <form id="setForm" novalidate>
+      <p class="note">Le bénéfice se calcule comme dans votre business plan : (articles + livraison payée) − articles × coût − transporteur − emballage − pub. Un colis refusé coûte : pub + retour + emballage.</p>
+      <div class="fr">
+        <label for="sCost">Coût par article (DT)<input id="sCost" type="number" step="0.1"></label>
+        <label for="sCourier">Transporteur (DT)<input id="sCourier" type="number" step="0.5"></label>
+        <label for="sReturn">Retour refusé (DT)<input id="sReturn" type="number" step="0.5"></label>
+        <label for="sPack">Emballage (DT)<input id="sPack" type="number" step="0.1"></label>
+        <label for="sAds">Pub par commande (DT)<input id="sAds" type="number" step="0.5"></label>
+        <label for="sGoal">Objectif mensuel (DT)<input id="sGoal" type="number" step="100"></label>
+      </div>
+      <div><button class="ghost" type="submit">Enregistrer les réglages</button> <span class="note" id="setMsg"></span></div>
+    </form>
+  </details>
+</main>
+
+<script>
+const PRICE = 9.9;
+const STATUSES = [["nouvelle","Nouvelle"],["confirmee","Confirmée"],["envoyee","Envoyée"],["livree","Livrée"],["refusee","Refusée"],["annulee","Annulée"]];
+const LABEL = Object.fromEntries(STATUSES);
+const DEFAULTS = {cost:3, courier:7, ret:4, pack:0.5, ads:8, goal:5000};
+let S = {...DEFAULTS}, orders = [], period = "month", stFilter = "toutes", db = null, readOnly = false;
+const $ = id => document.getElementById(id);
+const n3 = x => (Math.round(x*1000)/1000).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:3});
+const n0 = x => Math.round(x).toLocaleString("fr-FR");
+const today = () => new Date().toISOString().slice(0,10);
+const esc = s => String(s ?? "").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num = s => parseFloat(String(s).replace(/\s/g,"").replace(",", ".")) || 0;
+$("fDate").value = today();
+
+/* ---------- profit model (same as the business plan) ---------- */
+function profitOf(o){
+  if (o.status === "livree") return o.items*PRICE + (o.delivery||0) - o.items*S.cost - S.courier - S.pack - S.ads;
+  if (o.status === "refusee") return -(S.ads + S.ret + S.pack);
+  if (o.status === "annulee") return -S.ads;
+  return null; // pending
+}
+function inPeriod(o){
+  const d = o.date || "", t = today();
+  if (period === "today") return d === t;
+  if (period === "7") return d >= new Date(Date.now()-6*864e5).toISOString().slice(0,10);
+  if (period === "month") return d.slice(0,7) === t.slice(0,7);
+  return true;
+}
+
+/* ---------- WhatsApp message parser ---------- */
+function parse(txt){
+  const g = re => (txt.match(re)||[])[1]?.trim() || "";
+  const prods = (txt.match(/^- .+$/gm)||[]).map(l=>l.slice(2)).join("\n");
+  const liv = g(/Livraison\s*:\s*(.+)/i);
+  return { name:g(/Nom\s*:\s*(.+)/i), phone:g(/T[ée]l\s*:\s*(.+)/i), gov:g(/Gouvernorat\s*:\s*(.+)/i),
+           addr:g(/Adresse\s*:\s*(.+)/i), items:parseInt(g(/Articles\s*:\s*(\d+)/i))||0,
+           delivery:/gratuite/i.test(liv)?0:num(liv), products:prods };
+}
+$("fPaste").addEventListener("input", () => {
+  const p = parse($("fPaste").value);
+  if (p.name) $("fName").value = p.name;
+  if (p.phone) $("fPhone").value = p.phone;
+  if (p.gov) $("fGov").value = p.gov;
+  if (p.items) $("fItems").value = p.items;
+  $("fDelivery").value = p.items ? p.delivery : $("fDelivery").value;
+  if (p.products) $("fProducts").value = p.products;
+});
+$("fItems").addEventListener("input", () => { const k = parseInt($("fItems").value)||0; $("fDelivery").value = k>=5 ? 0 : 7; });
+
+/* ---------- render ---------- */
+function render(){
+  const list = orders.filter(inPeriod);
+  const deliv = list.filter(o=>o.status==="livree"), ref = list.filter(o=>o.status==="refusee");
+  const closed = deliv.length + ref.length;
+  const profit = list.reduce((s,o)=>s+(profitOf(o)??0),0);
+  const cash = deliv.reduce((s,o)=>s+o.items*PRICE+(o.delivery||0),0);
+  const items = deliv.reduce((s,o)=>s+o.items,0);
+  const pending = list.filter(o=>["nouvelle","confirmee","envoyee"].includes(o.status)).length;
+  $("kOrders").textContent = list.length;
+  $("kOrdersSub").textContent = pending ? `${pending} en cours` : "aucune en cours";
+  $("kDeliv").textContent = deliv.length; $("kItems").textContent = `${items} articles`;
+  const rr = closed ? ref.length/closed*100 : 0;
+  $("kRefuse").textContent = `${Math.round(rr)} %`; $("kRefuse").className = closed ? (rr>20?"neg":"pos") : "";
+  $("kCash").textContent = n3(cash);
+  $("kProfit").textContent = n3(profit); $("kProfit").className = profit>0?"pos":profit<0?"neg":"";
+  $("kBasket").textContent = list.length ? (list.reduce((s,o)=>s+o.items,0)/list.length).toFixed(1).replace(".",",") : "0";
+
+  // goal (always this month)
+  const m = orders.filter(o=>(o.date||"").slice(0,7)===today().slice(0,7));
+  const mp = m.reduce((s,o)=>s+(profitOf(o)??0),0), goal = S.goal||5000;
+  $("gText").textContent = `${n0(mp)} / ${n0(goal)} DT`;
+  $("gBar").style.width = Math.max(0,Math.min(100,mp/goal*100))+"%";
+  const day = new Date().getDate(), dim = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  $("gPace").textContent = `Rythme actuel : ~${n0(mp/day*dim)} DT à la fin du mois`;
+  const perOrder = (()=>{ const c = m.filter(o=>profitOf(o)!==null); return c.length ? c.reduce((s,o)=>s+profitOf(o),0)/c.length : 9.42; })();
+  const left = Math.max(0, goal-mp), daysLeft = dim-day+1;
+  $("gNeed").textContent = left>0 && perOrder>0 ? `Il faut ~${Math.ceil(left/perOrder/daysLeft)} commandes/jour d'ici la fin du mois` : left<=0 ? "Objectif atteint 🎉" : "Bénéfice moyen négatif : vérifiez pub et panier";
+
+  renderChart(); renderBest(list); renderList();
+}
+function renderChart(){
+  const days = [...Array(14)].map((_,i)=>new Date(Date.now()-(13-i)*864e5).toISOString().slice(0,10));
+  const counts = days.map(d=>orders.filter(o=>o.date===d).length);
+  const dl = days.map(d=>orders.filter(o=>o.date===d&&o.status==="livree").length);
+  const max = Math.max(4, ...counts), W=420, H=150, pad=22, bw=(W-pad)/14;
+  const y = v => H-18-(v/max)*(H-34);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Commandes par jour, 14 derniers jours">`;
+  [0, Math.round(max/2), max].forEach(v=>{ s+=`<line x1="${pad}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="0" y="${y(v)+3}">${v}</text>`; });
+  days.forEach((d,i)=>{ const x = pad+i*bw+3, w = bw-6;
+    s+=`<rect x="${x}" y="${y(counts[i])}" width="${w}" height="${H-18-y(counts[i])}" rx="3" fill="var(--soft)"/>`;
+    s+=`<rect x="${x}" y="${y(dl[i])}" width="${w}" height="${H-18-y(dl[i])}" rx="3" fill="var(--tag)"/>`;
+    if (i%2===1||i===13) s+=`<text x="${x+w/2}" y="${H-4}" text-anchor="middle">${d.slice(8)}</text>`; });
+  $("chart").innerHTML = s+`</svg><p class="note">Clair : commandes reçues · Rouge : livrées</p>`;
+}
+function renderBest(list){
+  const c = {};
+  list.forEach(o=>(o.products||"").split("\n").forEach(l=>{ const m = l.match(/^(\d+)\s*×\s*(.+?)(\s*\(.*)?$/); if(m){ c[m[2].trim()] = (c[m[2].trim()]||0)+parseInt(m[1]); }}));
+  const top = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  $("best").innerHTML = top.length ? top.map(([k,v])=>`<li><span>${esc(k)}</span><b>${v}</b></li>`).join("") : `<li class="note">Apparaît après vos premières commandes.</li>`;
+}
+function renderList(){
+  const counts = {toutes: orders.filter(inPeriod).length};
+  STATUSES.forEach(([k])=>counts[k]=orders.filter(o=>inPeriod(o)&&o.status===k).length);
+  $("filters").innerHTML = [["toutes","Toutes"],...STATUSES].map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${k===stFilter}">${l} ${counts[k]}</button>`).join("");
+  const list = orders.filter(o=>inPeriod(o)&&(stFilter==="toutes"||o.status===stFilter));
+  if (!list.length){ $("orders").innerHTML = `<p class="empty">${orders.length ? "Aucune commande pour ce filtre." : "Aucune commande encore. Collez un message WhatsApp « Nouvelle commande 3achra » dans le formulaire pour enregistrer la première."}</p>`; return; }
+  $("orders").innerHTML = list.map(o=>{
+    const p = profitOf(o), total = o.items*PRICE+(o.delivery||0);
+    return `<article class="order"><div><div class="who">${esc(o.name||"Sans nom")} <span class="chip st-${o.status}">${LABEL[o.status]||o.status}</span></div>
+      <div class="meta">${esc(o.date)} · ${esc(o.phone)} · ${esc(o.gov)} · ${o.items} article${o.items>1?"s":""}</div></div>
+      <div class="amt">${n3(total)} DT<small class="${p==null?"":p>=0?"pos":"neg"}">${p==null?"en cours":(p>=0?"+":"")+n3(p)+" DT"}</small></div>
+      ${o.products?`<div class="prods">${esc(o.products)}</div>`:""}
+      <div class="acts"><label class="note" for="st-${o.id}" style="flex-direction:row;align-items:center;gap:6px">Statut
+        <select id="st-${o.id}" data-id="${o.id}" ${readOnly?"disabled":""}>${STATUSES.map(([k,l])=>`<option value="${k}" ${k===o.status?"selected":""}>${l}</option>`).join("")}</select></label>
+        ${readOnly?"":`<button type="button" class="del" data-del="${o.id}">Supprimer</button>`}</div></article>`;
+  }).join("");
+}
+
+/* ---------- events ---------- */
+document.querySelector(".seg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; period=b.dataset.p;
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x===b)); render(); });
+$("filters").addEventListener("click", e=>{ const b=e.target.closest("button"); if(b){ stFilter=b.dataset.st; renderList(); } });
+$("orders").addEventListener("change", async e=>{ const s=e.target.closest("select[data-id]"); if(!s||!db) return;
+  try { await db.collection("orders").doc(s.dataset.id).update({status:s.value, updatedAt:Date.now()}); } catch(err){ showStatus("Le statut n'a pas été enregistré. Réessayez."); } });
+let pendingDel = null;
+$("orders").addEventListener("click", async e=>{ const b=e.target.closest("[data-del]"); if(!b||!db) return;
+  if (pendingDel !== b.dataset.del){ pendingDel = b.dataset.del; b.textContent = "Confirmer la suppression"; return; }
+  try { await db.collection("orders").doc(b.dataset.del).delete(); } catch(err){ showStatus("La suppression a échoué. Réessayez."); } pendingDel = null; });
+
+$("addForm").addEventListener("submit", async e=>{
+  e.preventDefault(); const err=$("fErr"); err.hidden=true;
+  const items = parseInt($("fItems").value)||0;
+  if (!$("fName").value.trim() || items<1){ err.textContent="Indiquez au moins le nom et le nombre d'articles."; err.hidden=false; return; }
+  if (!db){ err.textContent="Les commandes ne peuvent pas être enregistrées ici : ouvrez la page connecté à votre compte Claude."; err.hidden=false; return; }
+  const addr = parse($("fPaste").value).addr;
+  const o = { name:$("fName").value.trim(), phone:$("fPhone").value.trim(), gov:$("fGov").value.trim(), addr,
+    items, delivery:num($("fDelivery").value), products:$("fProducts").value.trim(), date:$("fDate").value||today(),
+    status:"nouvelle", createdAt:Date.now() };
+  $("addBtn").disabled = true;
+  try { await db.collection("orders").add(o);
+    ["fPaste","fName","fPhone","fGov","fProducts"].forEach(id=>$(id).value=""); $("fItems").value=5; $("fDelivery").value=0; $("fDate").value=today();
+    $("addBtn").textContent="Enregistrée ✓"; setTimeout(()=>$("addBtn").textContent="Enregistrer la commande",1500);
+  } catch(x){ err.textContent = x?.code==="quota_exceeded" ? "Stockage plein : supprimez d'anciennes commandes." : "L'enregistrement a échoué. Réessayez."; err.hidden=false; }
+  $("addBtn").disabled = false;
+});
+$("setForm").addEventListener("submit", async e=>{
+  e.preventDefault(); if(!db) return;
+  const v = {cost:num($("sCost").value), courier:num($("sCourier").value), ret:num($("sReturn").value), pack:num($("sPack").value), ads:num($("sAds").value), goal:num($("sGoal").value)||5000};
+  try { await db.doc("config/costs").set(v); $("setMsg").textContent="Réglages enregistrés."; } catch(x){ $("setMsg").textContent="Échec de l'enregistrement."; }
+});
+function fillSettings(){ $("sCost").value=S.cost; $("sCourier").value=S.courier; $("sReturn").value=S.ret; $("sPack").value=S.pack; $("sAds").value=S.ads; $("sGoal").value=S.goal; }
+function showStatus(t){ $("status").textContent=t; $("status").hidden=!t; }
+
+/* ---------- data ---------- */
+fillSettings(); render();
+(async()=>{
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db){ $("orders").innerHTML = `<p class="empty">Vos commandes s'affichent ici quand la page est ouverte dans Claude, connecté à votre compte.</p>`; showStatus("Données indisponibles dans cette vue."); return; }
+  const user = await window.claude.use("user");
+  if (user && (await user.can?.("data.write")) === false){ readOnly = true; $("addBtn").disabled = true; }
+  const timer = setTimeout(()=>showStatus("Les commandes ne répondent pas encore. Vérifiez votre connexion."), 10000);
+  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snap=>{
+    if (!snap.metadata.fromCache){ clearTimeout(timer); showStatus(""); }
+    orders = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
+  }, e=>{ clearTimeout(timer); showStatus("Impossible de charger les commandes pour le moment."); });
+  db.doc("config/costs").onSnapshot(d=>{ if(d.exists){ S={...DEFAULTS, ...d.data()}; fillSettings(); render(); } }, ()=>{});
+})();
+</script>
