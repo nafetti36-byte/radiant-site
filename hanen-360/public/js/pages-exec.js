@@ -27,6 +27,7 @@ export async function dashboardPage(main) {
       quick('⇄', 'Offre fournisseur', 'Prix → plafond, cible, économie', () => (d.counts.suppliers ? openEntityForm('offers', { onSaved: rerender }) : openEntityForm('suppliers', { title: 'D’abord : nouveau fournisseur', onSaved: rerender }))),
       quick('⚙', 'Période PM1 / PM2', 'Tonnes & coûts → coût/t, marge', () => openEntityForm('production', { title: 'Nouvelle période de production', onSaved: rerender })),
       quick('❋', 'Prix marché pâte', 'Référence BEKP / NBSK', () => openEntityForm('market_prices', { category: 'virgin_pulp', title: 'Prix marché pâte vierge', onSaved: rerender })),
+      quick('🧮', 'Calculatrices', '17 formules : tapez, c’est calculé', () => (location.hash = '#/calc')),
       can('admin') && noFx ? quick('€', 'Activer les taux auto', 'EUR/USD → TND chaque matin', fxAuto)
         : quick('€', 'Taux de change', noFx ? 'EUR/USD → TND' : `EUR ${d.fx.EUR?.rate ?? '—'} · USD ${d.fx.USD?.rate ?? '—'}`, () => (can('admin') ? fxAuto() : openEntityForm('fx_rates', { title: 'Taux de change', onSaved: rerender })))),
     ));

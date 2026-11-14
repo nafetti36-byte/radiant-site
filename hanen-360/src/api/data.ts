@@ -137,6 +137,7 @@ export function dataRoutes(r: Router) {
       vp_reference: { SWL: s.vp_reference_SWL, HWS: s.vp_reference_HWS, SOP: s.vp_reference_SOP },
       quality_equivalence: { SWL: num(s, 'quality_equivalence_SWL', 95), HWS: num(s, 'quality_equivalence_HWS', 90), SOP: num(s, 'quality_equivalence_SOP', 92) },
       best_by_grade: Object.fromEntries(Object.entries(f.ranking).map(([g, list]) => [g, list[0] ?? null])),
+      last: await c.env.DB.prepare("SELECT electricity_tariff, gas_tariff, steam_cost_tnd_t, water_tariff, period_end, machine FROM h360_production_periods WHERE validation_status='validated' ORDER BY period_end DESC LIMIT 1").first(),
     });
   });
   r.get('/api/defaults/offer', async (c) => {

@@ -8,7 +8,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 const PORT = 8798, BASE = `http://localhost:${PORT}`;
 const OUT = process.env.SHOTS || 'test-results/screens';
 mkdirSync(OUT, { recursive: true });
-const ROUTES = ['dashboard', 'ai', 'ai?tab=decisions', 'ai?tab=team', 'purchasing', 'purchasing?tab=offers', 'purchasing?tab=comparison', 'pulp', 'recovered', 'production', 'energy', 'pricing', 'savings', 'reports', 'admin', 'admin?tab=connections', 'admin?tab=automation', 'account'];
+const ROUTES = ['dashboard', 'calc', 'ai', 'ai?tab=decisions', 'ai?tab=team', 'purchasing', 'purchasing?tab=offers', 'purchasing?tab=comparison', 'pulp', 'recovered', 'production', 'energy', 'pricing', 'savings', 'reports', 'admin', 'admin?tab=connections', 'admin?tab=automation', 'account'];
 let passed = 0, failed = 0; const lines = [];
 const ok = (c, n, x) => { c ? passed++ : failed++; lines.push(`  ${c ? '✓' : '✗'} ${n}${!c && x !== undefined ? ' — ' + JSON.stringify(x).slice(0, 300) : ''}`); };
 
@@ -133,6 +133,20 @@ async function main() {
     await page.$eval('.q-card:first-child .answer', (e) => e.scrollIntoView({ block: 'start' })).catch(() => {});
     await page.evaluate(() => window.scrollBy(0, -70));
     await page.screenshot({ path: `${OUT}/iphone-assistant.png` });
+
+    // Calculators hub
+    await page.goto(`${BASE}/#/calc`); await page.waitForSelector('.calc-tile');
+    ok((await page.$$('.calc-tile')).length === 17, 'Calculatrices page shows 17 calculator icons');
+    await page.click('.calc-tile:has-text("Production horaire")');
+    await page.waitForSelector('.modal .calc-grid input');
+    const calcInputs = await page.$$('.modal .calc-grid input');
+    await calcInputs[0].fill('1500'); await calcInputs[1].fill('2.7'); await calcInputs[2].fill('17');
+    await page.waitForTimeout(200);
+    const calcOut = await page.textContent('.modal .calc-results');
+    ok(/89,2|89\.2/.test(calcOut) && (await page.textContent('.modal .calc-formula')).includes('vitesse') && (await page.textContent('.modal .calc-need')).includes('Grammage') && await page.isVisible('.modal .calc-grid input'), 'calculator shows formula + what to enter, and computes instantly (1500 m/min × 2.7 m × 17 g/m² → 89.2 t/day)', calcOut);
+    await page.screenshot({ path: `${OUT}/iphone-calculator.png` });
+    await page.click('.modal .modal-head button');
+    await page.screenshot({ path: `${OUT}/iphone-calc-hub.png` });
 
     // Decision workflow from the phone
     await page.goto(`${BASE}/#/ai?tab=decisions`);

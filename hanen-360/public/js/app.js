@@ -4,9 +4,10 @@ import { dashboardPage, aiPage } from './pages-exec.js';
 import { purchasingPage, pulpPage, recoveredPage } from './pages-buy.js';
 import { productionPage, energyPage, pricingPage, savingsPage, reportsPage } from './pages-make.js';
 import { adminPage, accountPage } from './pages-admin.js';
+import { calcPage } from './pages-calc.js';
 
 const NAV = [
-  ['dashboard', '▦', dashboardPage], ['ai', '✦', aiPage], ['purchasing', '⇄', purchasingPage], ['pulp', '❋', pulpPage],
+  ['dashboard', '▦', dashboardPage], ['calc', '🧮', calcPage], ['ai', '✦', aiPage], ['purchasing', '⇄', purchasingPage], ['pulp', '❋', pulpPage],
   ['recovered', '♻', recoveredPage], ['production', '⚙', productionPage], ['energy', 'ϟ', energyPage], ['pricing', '◈', pricingPage],
   ['savings', '€', savingsPage], ['reports', '▤', reportsPage], ['admin', '⛭', adminPage], ['account', '◉', accountPage],
 ];

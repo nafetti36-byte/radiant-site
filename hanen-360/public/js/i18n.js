@@ -2,7 +2,7 @@
 export const DICT = {
   fr: {
     app: 'Hanen 360', company: 'Azur Papier',
-    nav_dashboard: 'Tableau de Direction', nav_ai: 'Hanen AI', nav_purchasing: 'Achats & Fournisseurs', nav_pulp: 'Pâte vierge',
+    nav_dashboard: 'Tableau de Direction', nav_calc: 'Calculatrices', nav_ai: 'Hanen AI', nav_purchasing: 'Achats & Fournisseurs', nav_pulp: 'Pâte vierge',
     nav_recovered: 'Papiers recyclés', nav_production: 'Production PM1 & PM2', nav_energy: 'Énergie', nav_pricing: 'Prix Jumbo Roll',
     nav_savings: 'Économies', nav_reports: 'Rapports', nav_admin: 'Administration', nav_account: 'Mon compte', nav_more: 'Plus',
     short_dashboard: 'Direction', short_purchasing: 'Achats', short_production: 'Production', short_ai: 'Hanen AI',
@@ -48,7 +48,7 @@ export const DICT = {
   },
   en: {
     app: 'Hanen 360', company: 'Azur Papier',
-    nav_dashboard: 'Executive Dashboard', nav_ai: 'Hanen AI', nav_purchasing: 'Purchasing & Suppliers', nav_pulp: 'Virgin Pulp',
+    nav_dashboard: 'Executive Dashboard', nav_calc: 'Calculators', nav_ai: 'Hanen AI', nav_purchasing: 'Purchasing & Suppliers', nav_pulp: 'Virgin Pulp',
     nav_recovered: 'Recovered Paper', nav_production: 'Production PM1 & PM2', nav_energy: 'Energy', nav_pricing: 'Jumbo Roll Pricing',
     nav_savings: 'Savings Center', nav_reports: 'Reports', nav_admin: 'Administration', nav_account: 'My account', nav_more: 'More',
     short_dashboard: 'Dashboard', short_purchasing: 'Purchasing', short_production: 'Production', short_ai: 'Hanen AI',
@@ -94,7 +94,7 @@ export const DICT = {
   },
   ar: {
     app: 'حنان 360', company: 'أزور بابييه',
-    nav_dashboard: 'لوحة الإدارة', nav_ai: 'حنان AI', nav_purchasing: 'المشتريات والموردون', nav_pulp: 'اللب البكر',
+    nav_dashboard: 'لوحة الإدارة', nav_calc: 'الحاسبات', nav_ai: 'حنان AI', nav_purchasing: 'المشتريات والموردون', nav_pulp: 'اللب البكر',
     nav_recovered: 'الورق المسترجع', nav_production: 'الإنتاج PM1 و PM2', nav_energy: 'الطاقة', nav_pricing: 'تسعير البكرات',
     nav_savings: 'مركز التوفير', nav_reports: 'التقارير', nav_admin: 'الإدارة', nav_account: 'حسابي', nav_more: 'المزيد',
     short_dashboard: 'الإدارة', short_purchasing: 'المشتريات', short_production: 'الإنتاج', short_ai: 'حنان AI',
