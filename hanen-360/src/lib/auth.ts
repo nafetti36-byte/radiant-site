@@ -62,7 +62,7 @@ export async function createSession(env: Env, userId: number, req: Request, mfaP
   const expires = new Date(Date.now() + SESSION_TTL_H * 3600_000).toISOString();
   await env.DB.prepare(
     'INSERT INTO h360_sessions (id_hash, user_id, csrf, mfa_pending, expires_at, ip, user_agent) VALUES (?,?,?,?,?,?,?)',
-  ).bind(await sha256(token), userId, csrf, mfaPending ? 1 : 0, expires, req.headers.get('CF-Connecting-IP') || '', (req.headers.get('User-Agent') || '').slice(0, 200)).run();
+  ).bind(await sha256(token), userId, csrf, mfaPending ? 1 : 0, expires, req.headers.get('CF-Connecting-IP') || req.headers.get('x-nf-client-connection-ip') || '', (req.headers.get('User-Agent') || '').slice(0, 200)).run();
   // opportunistic cleanup of expired sessions
   await env.DB.prepare("DELETE FROM h360_sessions WHERE expires_at < ?").bind(new Date().toISOString()).run();
   return { cookie: sessionCookie(token, SESSION_TTL_H * 3600), csrf };

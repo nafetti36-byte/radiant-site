@@ -49,16 +49,19 @@ export function authRoutes(r: Router) {
     const key = `login:${email}:${c.ip}`;
     await checkRateLimit(c.env, key);
     await checkRateLimit(c.env, `login-ip:${c.ip}`, 20);
+    await checkRateLimit(c.env, `login-acct:${email}`, 10); // across IPs (distributed guessing)
     const u = await c.env.DB.prepare('SELECT * FROM h360_users WHERE email = ?').bind(email).first<any>();
     // constant work even for unknown accounts
     const ok = u ? await verifyPassword(String(b.password || ''), u.password_hash, u.password_salt, u.password_iterations) : (await hashPassword('x'), false);
     if (!u || !ok || !u.active) {
       await recordAttempt(c.env, key, false);
       await recordAttempt(c.env, `login-ip:${c.ip}`, false);
+      await recordAttempt(c.env, `login-acct:${email}`, false);
       await audit(c.env, { actor: `anonymous:${email}`, ip: c.ip }, 'auth.login_failed');
       throw new HttpError(401, 'Identifiants invalides');
     }
     await recordAttempt(c.env, key, true);
+    await recordAttempt(c.env, `login-acct:${email}`, true);
     const s = await createSession(c.env, u.id, c.req, !!u.mfa_enabled);
     if (!u.mfa_enabled) await c.env.DB.prepare("UPDATE h360_users SET last_login_at=datetime('now') WHERE id=?").bind(u.id).run();
     await audit(c.env, { userId: u.id, actor: `user:${email}`, ip: c.ip }, u.mfa_enabled ? 'auth.password_ok_mfa_pending' : 'auth.login');

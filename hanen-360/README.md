@@ -6,6 +6,21 @@ Hanen 360 is a Cloudflare Worker with a D1 database and a mobile-first web app. 
 
 ---
 
+## 0. Live deployment (Netlify)
+
+**https://hanen-360.netlify.app**, Netlify site `hanen-360`.
+
+- Static app in `public/`. The API runs as the Netlify Function `api` (`/api/*`), with the scheduled functions `cron-daily` (05:00 UTC) and `cron-weekly` (Monday 06:00 UTC).
+- Database: the same SQL schema, run by SQLite (sql.js) behind a D1-compatible facade (`src/netlify/`). The file is persisted in **Netlify Blobs** (store `hanen360`). Writes are conditional on the etag; on conflict the request is replayed.
+- Site environment variables: `SETUP_TOKEN` (delete it after creating the first administrator), `AWS_LAMBDA_JS_RUNTIME=nodejs22.x`, `AI_MODEL`. To enable Hanen AI, add `ANTHROPIC_API_KEY`. Optional: `NOTIFY_WEBHOOK_URL`, `PULP_FEED_URL`, `PULP_FEED_TOKEN`.
+- Redeploy: `node scripts/build-netlify.mjs && npx netlify-cli deploy --prod --dir public --functions netlify/functions`.
+- Back up the data: download the blob `hanen360.sqlite` (Netlify API `GET /api/v1/blobs/{site_id}/site:hanen360/hanen360.sqlite`). It is a standard SQLite file.
+- Tests on this runtime: `E2E_TARGET=netlify npm run test:e2e` (121/121).
+- Netlify limits: synchronous functions time out after ~10 s on the free plan (26 s on paid plans), and a Hanen AI answer that chains several tools can exceed that. Email ingestion (Cloudflare Email Routing) is not available on Netlify; upload quotation PDFs under *Documents entrants* instead.
+- The Cloudflare Worker deployment (sections 3 and 4) remains supported by the same code.
+
+---
+
 ## 1. What is in this release
 
 | Module | What it does |

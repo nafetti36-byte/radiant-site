@@ -4,3 +4,8 @@ node_modules/
 backups/
 test-results/
 tests/e2e/.xlsx-build.mjs
+netlify/functions/
+netlify/entries/
+src/netlify/migrations.generated.ts
+.netlify/
+tests/e2e/.netlify-local.mjs

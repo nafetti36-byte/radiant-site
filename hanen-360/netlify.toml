@@ -1,0 +1,14 @@
+# Hanen 360 on Netlify: static app in /public, API + scheduled jobs as Netlify Functions,
+# SQLite database persisted in Netlify Blobs (store "hanen360").
+[build]
+  publish = "public"
+  command = "node scripts/build-netlify.mjs"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "none"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

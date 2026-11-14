@@ -17,10 +17,13 @@
     "preflight": "bash scripts/preflight.sh"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0"
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@netlify/blobs": "^11.1.9",
+    "sql.js": "^1.16.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261114.1",
+    "@types/sql.js": "^1.4.11",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7",
     "wrangler": "^4.162.0"

@@ -32,7 +32,7 @@ export default {
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req);
     const m = router.match(req.method, url.pathname);
     if (!m) return json({ error: 'Route inconnue' }, 404);
-    const c: Ctx = { env, req, url, params: m.params, user: null, session: null, ip: req.headers.get('CF-Connecting-IP') || '0.0.0.0', exec };
+    const c: Ctx = { env, req, url, params: m.params, user: null, session: null, ip: req.headers.get('CF-Connecting-IP') || req.headers.get('x-nf-client-connection-ip') || '0.0.0.0', exec };
     try {
       Object.assign(c, await loadSession(env, req));
       checkCsrf(c);

@@ -60,28 +60,40 @@ async function waitFor(url, ms = 60000) {
 const sh = (cmd) => execSync(cmd, { stdio: 'pipe', cwd: process.cwd() }).toString();
 
 async function main() {
-  // ── Fresh local D1 with a simulated pre-existing (legacy) application table
-  rmSync('.wrangler/state', { recursive: true, force: true });
-  writeFileSync('.dev.vars', `SETUP_TOKEN=${SETUP_TOKEN}\nANTHROPIC_API_KEY=test-key-not-real\nANTHROPIC_BASE_URL=http://127.0.0.1:8790\nFX_API_BASE=http://127.0.0.1:8791\n`);
-  sh(`npx wrangler d1 execute DB --local --command "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT, full_name TEXT, password TEXT); INSERT INTO users (email, full_name, password) VALUES ('hanen.mosbah@azur-papier.example','Hanen Mosbah','legacy-hash'),('controle@azur-papier.example','Contrôle Gestion','legacy-hash2');"`);
-  const legacyBefore = sh(`npx wrangler d1 execute DB --local --json --command "SELECT * FROM users ORDER BY id"`);
-  sh('npx wrangler d1 migrations apply DB --local');
+  const NETLIFY = process.env.E2E_TARGET === 'netlify';
+  const LEGACY_SQL = "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT, full_name TEXT, password TEXT); INSERT INTO users (email, full_name, password) VALUES ('hanen.mosbah@azur-papier.example','Hanen Mosbah','legacy-hash'),('controle@azur-papier.example','Contrôle Gestion','legacy-hash2');";
+  const testEnv = { SETUP_TOKEN, ANTHROPIC_API_KEY: 'test-key-not-real', ANTHROPIC_BASE_URL: 'http://127.0.0.1:8790', FX_API_BASE: 'http://127.0.0.1:8791' };
+  let legacyBefore, dev;
+  const legacyRows = async () => NETLIFY ? JSON.stringify(await (await fetch(`${BASE}/__test/legacy`)).json()) : JSON.stringify(JSON.parse(sh(`npx wrangler d1 execute DB --local --json --command "SELECT * FROM users ORDER BY id"`))[0].results);
+  if (NETLIFY) {
+    results.push('Target: Netlify runtime (Functions handler + D1 facade on sql.js + Blobs store)');
+    sh('npx esbuild tests/e2e/netlify-local-entry.ts --bundle --platform=node --format=esm --log-level=error --outfile=tests/e2e/.netlify-local.mjs --banner:js="import { createRequire as __cr } from \'module\'; const require = __cr(import.meta.url);"');
+  } else {
+    // ── Fresh local D1 with a simulated pre-existing (legacy) application table
+    rmSync('.wrangler/state', { recursive: true, force: true });
+    writeFileSync('.dev.vars', Object.entries(testEnv).map(([k, v]) => `${k}=${v}`).join('\n') + '\n');
+    sh(`npx wrangler d1 execute DB --local --command "${LEGACY_SQL}"`);
+    legacyBefore = await legacyRows();
+    sh('npx wrangler d1 migrations apply DB --local');
+  }
 
   const ai = await startAnthropicMock(8790);
   const fx = await startFxMock(8791);
-  const dev = spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1', '--test-scheduled'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  dev = NETLIFY
+    ? spawn('node', ['tests/e2e/.netlify-local.mjs'], { stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, ...testEnv, PORT: String(PORT), SEED_LEGACY: LEGACY_SQL } })
+    : spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1', '--test-scheduled'], { stdio: ['ignore', 'pipe', 'pipe'] });
   let devLog = ''; dev.stdout.on('data', (d) => (devLog += d)); dev.stderr.on('data', (d) => (devLog += d));
   try {
     await waitFor(`${BASE}/api/health`);
+    if (NETLIFY) legacyBefore = await legacyRows();
     await suite();
-    const legacyAfter = sh(`npx wrangler d1 execute DB --local --json --command "SELECT * FROM users ORDER BY id"`);
-    ok(JSON.stringify(JSON.parse(legacyBefore)[0].results) === JSON.stringify(JSON.parse(legacyAfter)[0].results), 'legacy table rows are untouched after migration and full test run');
+    ok(legacyBefore === await legacyRows() && legacyBefore.includes('legacy-hash'), 'legacy table rows are untouched after migration and full test run');
   } catch (e) {
     failed++; results.push(`  ✗ suite crashed: ${e.stack}`);
     console.log(devLog.slice(-4000));
   } finally {
     dev.kill('SIGTERM'); ai.close(); fx.close();
-    writeFileSync('.dev.vars', 'SETUP_TOKEN=local-test-setup-token\n');
+    if (!NETLIFY) writeFileSync('.dev.vars', 'SETUP_TOKEN=local-test-setup-token\n');
   }
   console.log(results.join('\n'));
   console.log(`\n${passed} passed, ${failed} failed`);
