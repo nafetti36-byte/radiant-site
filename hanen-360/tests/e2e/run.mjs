@@ -62,7 +62,7 @@ const sh = (cmd) => execSync(cmd, { stdio: 'pipe', cwd: process.cwd() }).toStrin
 async function main() {
   const NETLIFY = process.env.E2E_TARGET === 'netlify';
   const LEGACY_SQL = "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT, full_name TEXT, password TEXT); INSERT INTO users (email, full_name, password) VALUES ('hanen.mosbah@azur-papier.example','Hanen Mosbah','legacy-hash'),('controle@azur-papier.example','Contrôle Gestion','legacy-hash2');";
-  const testEnv = { SETUP_TOKEN, ANTHROPIC_API_KEY: 'test-key-not-real', ANTHROPIC_BASE_URL: 'http://127.0.0.1:8790', FX_API_BASE: 'http://127.0.0.1:8791' };
+  const testEnv = { SETUP_TOKEN, ANTHROPIC_API_KEY: 'test-key-not-real', ANTHROPIC_BASE_URL: 'http://127.0.0.1:8790', FX_API_BASE: 'http://127.0.0.1:8791', AI_KEY_ENCRYPTION_KEY: 'q0d0uP2X9k3m4n5b6v7c8x9z0a1s2d3f4g5h6j7k8l8=' };
   let legacyBefore, dev;
   const legacyRows = async () => NETLIFY ? JSON.stringify(await (await fetch(`${BASE}/__test/legacy`)).json()) : JSON.stringify(JSON.parse(sh(`npx wrangler d1 execute DB --local --json --command "SELECT * FROM users ORDER BY id"`))[0].results);
   if (NETLIFY) {
@@ -338,6 +338,20 @@ async function suite() {
   ok(!(await hanen.get('/api/offers')).data.some((o) => o.grade === 'SOP'), 'extraction does not create an offer without validation');
   r = await analyst.post(`/api/inbound/${doc}/convert`, { supplier_id: sCap, category: 'recovered', grade: 'SOP', offer_date: '2026-11-10', price: 1010, currency: 'TND', quantity_t: 300 });
   ok(r.status === 201 && (await hanen.get(`/api/offers/${r.data.offer_id}`)).data.source === 'pdf', 'validated draft becomes an offer with source + audit trail');
+
+  // In-app AI key (encrypted at rest, never returned)
+  ok((await analyst.post('/api/admin/ai-key', { key: 'sk-ant-x' })).status === 403, 'only admins can set the AI key');
+  ok((await admin.post('/api/admin/ai-key', { key: 'not-a-key' })).status === 422, 'AI key format validated');
+  r = await admin.post('/api/admin/ai-key', { key: 'sk-ant-bad-0000000000000000000000000' });
+  ok(r.status === 422 && /refusée/.test(r.data.error), 'key rejected by Anthropic is not saved', r.data);
+  const realish = 'sk-ant-api03-TESTONLY' + 'x'.repeat(40) + 'Zk9Q';
+  r = await admin.post('/api/admin/ai-key', { key: realish });
+  ok(r.status === 200 && r.data.hint === 'Zk9Q', 'valid AI key tested and saved from the app', r.data);
+  ok((await admin.get('/api/admin/ai-key')).data.stored?.hint === 'Zk9Q', 'only the last 4 characters are ever shown');
+  const leakSettings = JSON.stringify((await admin.get('/api/settings')).data);
+  const leakBackup = await (await admin.req('GET', '/api/admin/backup', undefined, { raw: true })).text();
+  const leakAudit = JSON.stringify((await admin.get('/api/admin/audit')).data);
+  ok(![leakSettings, leakBackup, leakAudit].some((x) => x.includes('TESTONLY') || x.includes('secret_anthropic')), 'AI key never appears in settings, backup or audit log');
 
   results.push('Phase 5 — administration & production readiness');
   const legacy = (await admin.get('/api/admin/legacy')).data;

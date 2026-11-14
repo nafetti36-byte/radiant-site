@@ -11,6 +11,7 @@ import { aiRoutes } from './api/ai';
 import { adminRoutes } from './api/admin';
 import { handleScheduled } from './jobs/scheduled';
 import { handleEmail } from './jobs/email';
+import { withStoredAiKey } from './lib/secretbox';
 
 const router = new Router();
 authRoutes(router);
@@ -29,6 +30,7 @@ router.get('/api/health', async (c) => {
 export default {
   async fetch(req: Request, env: Env, exec: ExecutionContext): Promise<Response> {
     const url = new URL(req.url);
+    if (/^\/api\/(ai|admin\/connectors|inbound)/.test(url.pathname)) env = await withStoredAiKey(env);
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req);
     const m = router.match(req.method, url.pathname);
     if (!m) return json({ error: 'Route inconnue' }, 404);
@@ -48,6 +50,6 @@ export default {
     exec.waitUntil(handleScheduled(event, env));
   },
   async email(message: ForwardableEmailMessage, env: Env) {
-    await handleEmail(message, env);
+    await handleEmail(message, await withStoredAiKey(env));
   },
 } satisfies ExportedHandler<Env>;

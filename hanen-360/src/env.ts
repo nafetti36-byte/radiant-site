@@ -5,6 +5,7 @@ export interface Env {
   AI_MODEL?: string;
   SETUP_TOKEN?: string;
   ANTHROPIC_API_KEY?: string;
+  AI_KEY_ENCRYPTION_KEY?: string; // 32 random bytes (base64) to encrypt the AI key pasted in the app
   ANTHROPIC_BASE_URL?: string; // tests only: points to a local mock
   NOTIFY_WEBHOOK_URL?: string;
   PULP_FEED_URL?: string;

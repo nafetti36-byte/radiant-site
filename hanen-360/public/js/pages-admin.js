@@ -46,7 +46,7 @@ async function users(body, rerender) {
 }
 
 const CONN_INFO = {
-  ai: { name: 'Hanen AI (Claude, Anthropic)', how: 'npx wrangler secret put ANTHROPIC_API_KEY — puis « Tester ».' },
+  ai: { name: 'Hanen AI (Claude, Anthropic)', how: '1. console.anthropic.com → Billing : ajouter du crédit. 2. API Keys → Create Key → copier. 3. Coller la clé ci-dessous → Enregistrer. La clé est testée, chiffrée et ne sera plus jamais affichée.' },
   fx: { name: 'Taux de change automatiques', how: 'Source par défaut : open.er-api.com (gratuite, sans clé). Pour la comptabilité, saisir le fixing BCT. Activer puis « Tester ».' },
   pulp_feed: { name: 'Flux prix pâte sous licence', how: 'Abonnement requis (ex. Fastmarkets RISI, TTO). Secrets PULP_FEED_URL et PULP_FEED_TOKEN ; format JSON { prices: [...] } documenté dans le README.' },
   email: { name: 'Cotations par email', how: 'Cloudflare Email Routing → « Send to Worker » hanen-360, puis renseigner les domaines fournisseurs autorisés (Paramètres).' },
@@ -65,12 +65,33 @@ async function connections(body, rerender) {
       h('p', {}, ds === 'connected' ? badge(t('connected'), 'ok') : ds === 'error' ? badge(t('error'), 'bad') : badge(t('connexion_requise'), 'warn'), ' ', h('small', { class: 'muted' }, c.detail || '')),
       h('p', { class: 'small' }, info.how),
       h('p', { class: 'small muted' }, `Dernier test : ${dtFmt(c.last_check_at)} · dernier succès : ${dtFmt(c.last_ok_at)}`),
+      c.id === 'ai' && can('admin') ? aiKeyBox(rerender) : null,
       can('admin') ? h('div', { class: 'row' },
         !['ai', 'erp', 'email'].includes(c.id) ? h('button', { class: 'btn btn-sm', onclick: async () => { await guard(() => api(`/api/admin/connectors/${c.id}`, { method: 'POST', body: { enabled: !c.enabled } }), t('saved')); rerender(); } }, c.enabled ? t('disable') : t('enable')) : null,
         ['ai', 'fx', 'pulp_feed', 'notify'].includes(c.id) ? h('button', { class: 'btn btn-sm btn-primary', onclick: async (e) => { e.target.disabled = true; const x = await api(`/api/admin/connectors/${c.id}`, { method: 'POST', body: { test: true } }).catch((er) => ({ ok: false, error: er.message })); toast(x.ok ? '✓ connecté' : x.error, x.ok ? 'ok' : 'error'); rerender(); } }, t('test')) : null) : null,
     ]));
   }
   body.append(grid);
+}
+
+function aiKeyBox(rerender) {
+  const box = h('div', { class: 'ai-key-box' }, h('p', { class: 'muted small' }, '…'));
+  api('/api/admin/ai-key').then((st) => {
+    const input = h('input', { type: 'password', placeholder: 'sk-ant-…', autocomplete: 'off', spellcheck: 'false', 'aria-label': 'Clé API Anthropic' });
+    const msg = h('p', { class: 'small' });
+    const save = h('button', { class: 'btn btn-primary', onclick: async () => {
+      save.disabled = true; save.textContent = 'Test de la clé…'; msg.textContent = '';
+      try { const r = await api('/api/admin/ai-key', { method: 'POST', body: { key: input.value } }); input.value = ''; toast(`Hanen AI connecté ✓ (clé …${r.hint})`); rerender(); }
+      catch (e) { msg.textContent = e.message; msg.className = 'small bad'; save.disabled = false; save.textContent = 'Enregistrer et tester'; }
+    } }, 'Enregistrer et tester');
+    box.replaceChildren(
+      st.stored ? h('p', {}, badge(`Clé enregistrée …${st.stored.hint}`, 'ok'), ' ', h('small', { class: 'muted' }, dtFmt(st.stored.updated_at)), ' ',
+        h('button', { class: 'btn btn-sm btn-danger-ghost', onclick: async () => { if (await confirmBox('Supprimer la clé IA ?')) { await guard(() => api('/api/admin/ai-key', { method: 'DELETE' })); rerender(); } } }, t('delete'))) : null,
+      st.env_secret ? h('p', { class: 'small muted' }, 'Clé configurée côté serveur (secret).') : null,
+      st.can_store ? h('div', { class: 'row' }, input, save) : h('p', { class: 'small' }, 'Stockage chiffré indisponible : configurer le secret ANTHROPIC_API_KEY sur l’hébergeur.'),
+      msg);
+  }).catch(() => box.replaceChildren());
+  return box;
 }
 
 async function fx(body, rerender) {

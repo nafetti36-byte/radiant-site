@@ -17,6 +17,7 @@ export function startAnthropicMock(port) {
     let raw = '';
     req.on('data', (c) => (raw += c));
     req.on('end', () => {
+      if (req.method === 'GET' && req.url.startsWith('/v1/models/') && /bad/.test(req.headers.authorization || req.headers['x-api-key'] || '')) return send(res, 401, { type: 'error', error: { type: 'authentication_error', message: 'invalid x-api-key' } });
       if (req.method === 'GET' && req.url.startsWith('/v1/models/')) return send(res, 200, { id: decodeURIComponent(req.url.split('/').pop()), type: 'model', display_name: 'mock' });
       if (req.method !== 'POST' || !req.url.startsWith('/v1/messages')) return send(res, 404, { error: 'nf' });
       if (!req.headers['x-api-key'] && !req.headers.authorization) return send(res, 401, { type: 'error', error: { type: 'authentication_error', message: 'no key' } });

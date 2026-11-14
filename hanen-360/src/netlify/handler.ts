@@ -3,7 +3,7 @@ import worker from '../index';
 import type { Env } from '../env';
 import { withDatabase, type BlobLike } from './store';
 
-const ENV_KEYS = ['APP_ENV', 'AI_MODEL', 'SETUP_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'NOTIFY_WEBHOOK_URL', 'PULP_FEED_URL', 'PULP_FEED_TOKEN', 'FX_API_BASE'] as const;
+const ENV_KEYS = ['APP_ENV', 'AI_MODEL', 'SETUP_TOKEN', 'ANTHROPIC_API_KEY', 'AI_KEY_ENCRYPTION_KEY', 'ANTHROPIC_BASE_URL', 'NOTIFY_WEBHOOK_URL', 'PULP_FEED_URL', 'PULP_FEED_TOKEN', 'FX_API_BASE'] as const;
 
 export function envFrom(get: (k: string) => string | undefined, db: unknown): Env {
   const env: Record<string, unknown> = { DB: db, ASSETS: { fetch: async () => new Response('Not found', { status: 404 }) }, AI_MODEL: 'claude-opus-5-5', APP_ENV: 'production' };

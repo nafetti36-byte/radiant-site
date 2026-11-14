@@ -303,3 +303,4 @@ input.autofilled, select.autofilled { background: #eef8ec; transition: backgroun
   .modal .lp-note { display: none; }
   .modal .live-preview:focus-within .lp-note, .modal .live-preview:hover .lp-note { display: block; }
 }
+.ai-key-box .row input { flex: 1 1 220px; }

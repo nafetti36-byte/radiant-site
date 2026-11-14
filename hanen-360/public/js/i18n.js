@@ -27,7 +27,7 @@ export const DICT = {
     ai_title: 'Hanen AI — Expert Économique & Financier', ai_sub: 'Analyses fondées sur vos données validées. Hanen reste décisionnaire.',
     ai_placeholder: 'Posez une question économique…', ai_send: 'Envoyer', ai_thinking: 'Analyse en cours…', ai_new: 'Nouvelle conversation',
     ai_team: 'Équipe IA', ai_chat: 'Conversation', ai_history: 'Historique', ai_tools_used: 'Données consultées',
-    ai_not_configured: 'Connexion requise : l’administrateur doit configurer la clé du service IA (secret ANTHROPIC_API_KEY). Les calculs et recommandations du moteur restent disponibles.',
+    ai_not_configured: 'Hanen AI n’est pas encore activé : l’administrateur colle la clé Anthropic dans Administration → Connexions → Hanen AI. Les calculs et recommandations du moteur restent disponibles.',
     agent_active: 'Actif', agent_idle: 'En veille', run_analysis: 'Lancer l’analyse', last_run: 'Dernière exécution',
     suppliers: 'Fournisseurs', offers: 'Offres', comparison: 'Comparaison', inbound: 'Documents entrants', negotiation: 'Négociation',
     effective_cost: 'Coût fibre effectif', per_usable_t: 'TND/t utile', ceiling: 'Prix maximum', target: 'Prix cible', savings_exp: 'Économie attendue',

@@ -39,7 +39,7 @@ export type SettingKey = keyof typeof DEFAULT_SETTINGS;
 export async function getSettings(env: Env): Promise<Record<SettingKey, string>> {
   const rows = await env.DB.prepare('SELECT key, value FROM h360_settings').all<{ key: string; value: string }>();
   const out: Record<string, string> = { ...DEFAULT_SETTINGS };
-  for (const r of rows.results) out[r.key] = r.value;
+  for (const r of rows.results) if (!r.key.startsWith('secret_')) out[r.key] = r.value;
   return out as Record<SettingKey, string>;
 }
 

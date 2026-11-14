@@ -8,6 +8,7 @@ import { runJob } from '../jobs/runner';
 import { notify, setConnector, syncPulpFeed, updateFx } from '../jobs/connectors';
 import { aiConfigured } from '../ai/client';
 import { dailyPipeline, weeklyPipeline } from '../jobs/scheduled';
+import { aiKeyInfo, deleteAiKey, saveAiKey, storedKeyAvailable } from '../lib/secretbox';
 
 const EMAIL = /^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,}$/;
 const ROLES = ['admin', 'director', 'analyst', 'viewer'];
@@ -126,6 +127,42 @@ export function adminRoutes(r: Router) {
     return json(res);
   });
 
+  // ── Hanen AI key pasted by an administrator (encrypted at rest, never returned)
+  r.get('/api/admin/ai-key', async (c) => {
+    requirePerm(c, 'admin');
+    return json({ env_secret: !!c.env.ANTHROPIC_API_KEY && !(await aiKeyInfo(c.env)), stored: await aiKeyInfo(c.env), can_store: storedKeyAvailable(c.env) });
+  });
+  r.post('/api/admin/ai-key', async (c) => {
+    const u = requirePerm(c, 'admin');
+    if (!storedKeyAvailable(c.env)) throw new HttpError(503, 'Stockage chiffré indisponible (AI_KEY_ENCRYPTION_KEY manquant) : utilisez le secret ANTHROPIC_API_KEY');
+    const b = await readJson<any>(c.req);
+    const k = String(b.key || '').trim();
+    if (!/^sk-ant-[A-Za-z0-9_\-]{20,300}$/.test(k)) throw new HttpError(422, 'Clé invalide : elle doit commencer par sk-ant- (copiez-la depuis console.anthropic.com → API Keys)');
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    const { model } = await import('../ai/client');
+    try {
+      const m = await new Anthropic({ apiKey: k, baseURL: c.env.ANTHROPIC_BASE_URL || undefined, maxRetries: 1, timeout: 15000 }).models.retrieve(model(c.env));
+      await saveAiKey(c.env, k, u.id);
+      await setConnector(c.env, 'ai', 'connected', `Clé …${k.slice(-4)} — modèle ${m.id} disponible`, true);
+      await auditCtx(c, 'ai_key.saved', 'connector', 'ai', { hint: k.slice(-4) });
+      return json({ ok: true, hint: k.slice(-4), model: m.id });
+    } catch (e: any) {
+      const msg = e instanceof Anthropic.AuthenticationError ? 'Clé refusée par Anthropic (invalide ou révoquée)'
+        : e instanceof Anthropic.PermissionDeniedError ? 'Clé sans accès à ce modèle'
+        : e instanceof Anthropic.APIConnectionError ? 'Service Anthropic injoignable — réessayez'
+        : e instanceof Anthropic.APIError ? `Anthropic a répondu ${e.status} : vérifiez le crédit (Billing) du compte` : String(e?.message || e);
+      await auditCtx(c, 'ai_key.rejected', 'connector', 'ai', { reason: msg });
+      throw new HttpError(422, msg);
+    }
+  });
+  r.del('/api/admin/ai-key', async (c) => {
+    requirePerm(c, 'admin');
+    await deleteAiKey(c.env);
+    await setConnector(c.env, 'ai', 'not_configured', 'Clé supprimée', false);
+    await auditCtx(c, 'ai_key.deleted', 'connector', 'ai');
+    return json({ ok: true });
+  });
+
   // ── API keys for ERP / production / energy system pushes
   r.get('/api/admin/api-keys', async (c) => {
     requirePerm(c, 'admin');
@@ -182,7 +219,7 @@ export function adminRoutes(r: Router) {
     for (const t of tables) {
       if (!IDENT.test(t)) continue;
       const rows = (await c.env.DB.prepare(`SELECT * FROM ${t}`).all<any>()).results;
-      out[t] = t === 'h360_users' ? rows.map(({ password_hash, password_salt, mfa_secret, ...rest }: any) => rest) : t === 'h360_api_keys' ? rows.map(({ key_hash, ...rest }: any) => rest) : rows;
+      out[t] = t === 'h360_settings' ? rows.filter((x: any) => !String(x.key).startsWith('secret_')) : t === 'h360_users' ? rows.map(({ password_hash, password_salt, mfa_secret, ...rest }: any) => rest) : t === 'h360_api_keys' ? rows.map(({ key_hash, ...rest }: any) => rest) : rows;
     }
     await auditCtx(c, 'backup.export', 'database', null, { tables: tables.length });
     return file(JSON.stringify({ exported_at: new Date().toISOString(), note: 'Secrets (hachages de mots de passe, MFA, clés API) exclus', tables: out }), 'application/json', `hanen360-backup-${today()}.json`);
