@@ -9,3 +9,4 @@ netlify/entries/
 src/netlify/migrations.generated.ts
 .netlify/
 tests/e2e/.netlify-local.mjs
+tests/e2e/.engine-build.mjs

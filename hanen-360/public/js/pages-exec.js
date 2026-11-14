@@ -1,6 +1,6 @@
 import { h, api, session, clear, kpi, card, tnd, pct, fmt, lineChart, breakdownChart, statusBadge, table, emptyState, dateFmt, dtFmt, toast, guard, can, tabs, qs, setQs, promptBox, download, badge } from './core.js';
 import { t, L, getLang } from './i18n.js';
-import { pageHead, actionBar, runAnalysis, openImport } from './shared.js';
+import { pageHead, actionBar, runAnalysis, openImport, openEntityForm } from './shared.js';
 
 // ═════════ Tableau de Direction ═════════
 export async function dashboardPage(main) {
@@ -13,6 +13,23 @@ export async function dashboardPage(main) {
     onAnalyze: () => runAnalysis(rerender),
     onExport: async () => { const r = await guard(() => api('/api/reports', { method: 'POST', body: { kind: 'adhoc' } })); download(`/api/reports/${r.id}?format=pdf`, 'rapport.pdf'); },
   })));
+
+  const quick = (ico, title, sub, fn) => h('button', { class: 'quick-btn', type: 'button', onclick: fn }, h('span', { class: 'ico', 'aria-hidden': 'true' }, ico), h('strong', {}, title), h('small', {}, sub));
+  if (can('write')) {
+    const fxAuto = async () => {
+      const r = await api('/api/admin/connectors/fx', { method: 'POST', body: { enabled: true, test: true } }).catch((e) => ({ ok: false, error: e.message }));
+      if (r.ok) { toast(`Taux mis à jour : ${r.output.saved.map((x) => `${x.currency} ${x.rate_tnd}`).join(' · ')} — automatique chaque matin`); rerender(); }
+      else toast(r.error || 'Échec', 'error');
+    };
+    const noFx = !d.fx || Object.keys(d.fx).filter((k) => k !== 'TND').length === 0;
+    main.append(card('⚡ Saisie rapide — les calculs se font seuls', h('div', { class: 'quick-grid' },
+      quick('⇄', 'Offre fournisseur', 'Prix → plafond, cible, économie', () => (d.counts.suppliers ? openEntityForm('offers', { onSaved: rerender }) : openEntityForm('suppliers', { title: 'D’abord : nouveau fournisseur', onSaved: rerender }))),
+      quick('⚙', 'Période PM1 / PM2', 'Tonnes & coûts → coût/t, marge', () => openEntityForm('production', { title: 'Nouvelle période de production', onSaved: rerender })),
+      quick('❋', 'Prix marché pâte', 'Référence BEKP / NBSK', () => openEntityForm('market_prices', { category: 'virgin_pulp', title: 'Prix marché pâte vierge', onSaved: rerender })),
+      can('admin') && noFx ? quick('€', 'Activer les taux auto', 'EUR/USD → TND chaque matin', fxAuto)
+        : quick('€', 'Taux de change', noFx ? 'EUR/USD → TND' : `EUR ${d.fx.EUR?.rate ?? '—'} · USD ${d.fx.USD?.rate ?? '—'}`, () => (can('admin') ? fxAuto() : openEntityForm('fx_rates', { title: 'Taux de change', onSaved: rerender })))),
+    ));
+  }
 
   if (!d.setup_complete) {
     const labels = { fx: t('step_fx'), suppliers: t('step_suppliers'), market: t('step_market'), offers: t('step_offers'), production: t('step_production') };

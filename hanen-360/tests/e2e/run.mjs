@@ -80,8 +80,8 @@ async function main() {
   const ai = await startAnthropicMock(8790);
   const fx = await startFxMock(8791);
   dev = NETLIFY
-    ? spawn('node', ['tests/e2e/.netlify-local.mjs'], { stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, ...testEnv, PORT: String(PORT), SEED_LEGACY: LEGACY_SQL } })
-    : spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1', '--test-scheduled'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    ? spawn('node', ['tests/e2e/.netlify-local.mjs'], { stdio: ['ignore', 'pipe', 'pipe'], detached: true, env: { ...process.env, ...testEnv, PORT: String(PORT), SEED_LEGACY: LEGACY_SQL } })
+    : spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1', '--test-scheduled'], { stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   let devLog = ''; dev.stdout.on('data', (d) => (devLog += d)); dev.stderr.on('data', (d) => (devLog += d));
   try {
     await waitFor(`${BASE}/api/health`);
@@ -92,7 +92,7 @@ async function main() {
     failed++; results.push(`  ✗ suite crashed: ${e.stack}`);
     console.log(devLog.slice(-4000));
   } finally {
-    dev.kill('SIGTERM'); ai.close(); fx.close();
+    try { process.kill(-dev.pid, 'SIGTERM'); } catch { dev.kill('SIGTERM'); } ai.close(); fx.close();
     if (!NETLIFY) writeFileSync('.dev.vars', 'SETUP_TOKEN=local-test-setup-token\n');
   }
   console.log(results.join('\n'));
@@ -221,6 +221,17 @@ async function suite() {
   const cost = (await hanen.get('/api/analysis/costing?machine=PM1')).data;
   ok(cost.periods.length === 2 && cost.periods[0].result.cost_per_saleable_t > cost.periods[1].result.cost_per_saleable_t, 'PM1 costing computed per saleable tonne');
   ok(cost.variance[0]?.drivers[0].key === 'electricity', 'variance analysis identifies electricity as main driver', cost.variance[0]?.drivers?.[0]);
+  const dOffer = (await analyst.get(`/api/defaults/offer?supplier_id=${sCap}&grade=SWL`)).data;
+  ok(dOffer.values.processing_tnd_t === 80 && dOffer.values.contamination_pct === 3 && dOffer.previous_price?.price === 1700, 'offer form pre-fills from the supplier’s last offer (only the price is new)', dOffer);
+  const dProd = (await analyst.get('/api/defaults/production?machine=PM1')).data;
+  ok(dProd.values.period_start === '2026-11-01' && dProd.values.period_end === '2026-11-30' && dProd.values.electricity_tariff === 0.3 && dProd.unit.vp_price_tnd_t === 2500 && dProd.values.electricity_kwh === undefined, 'production form pre-fills next dates, tariffs and prices — never consumptions', dProd);
+  const ctx = (await analyst.get('/api/defaults/context')).data;
+  ok(ctx.fx.USD > 0 && ctx.references.BEKP && ctx.fin.inventory_days === 30, 'calculation context for live previews available');
+  sh('npx esbuild public/js/engine.js --bundle --format=esm --platform=neutral --log-level=error --outfile=tests/e2e/.engine-build.mjs');
+  const eng = await import('./.engine-build.mjs');
+  const o1live = eng.effectiveCost({ price: 1700, currency: 'TND', fx_tnd: 1, freight_tnd_t: 30, customs_pct: 0, handling_tnd_t: 0, processing_tnd_t: 80, energy_extra_tnd_t: 20, chemicals_extra_tnd_t: 25, other_tnd_t: 0, moisture_pct: 10, contamination_pct: 3, process_loss_pct: 15, payment_terms_days: 60 }, ctx.fin);
+  const o1srv = (await hanen.get('/api/analysis/fibre')).data.offers.find((o) => o.id === swl1);
+  ok(Math.abs(o1live.effective_tnd_per_usable_t - o1srv.cost.effective_tnd_per_usable_t) < 1e-6, 'browser live preview = server result (same engine code)');
   const energy = (await hanen.get('/api/analysis/energy')).data;
   ok(energy.PM1.gap_to_best_tnd > 0 && energy.PM2, 'energy KPIs and gap to best period computed');
   r = await hanen.post('/api/analysis/price-simulation', { period_id: cost.periods[0].id, proposed_price_tnd_t: 3040, fibre_price_change_pct: -8, save: true, name: 'Baisse 5 % PM1' });
@@ -228,8 +239,11 @@ async function suite() {
   ok((await viewer.post('/api/analysis/price-simulation', { period_id: cost.periods[0].id, save: true, name: 'x' })).status === 403, 'viewer cannot save simulations');
 
   results.push('Phase 3 — automation');
+  const autoJobs = (await admin.get('/api/admin/jobs')).data.filter((j) => j.type === 'auto_scan');
+  ok(autoJobs.length >= 5 && autoJobs.every((j) => j.status === 'succeeded'), 'analysis re-runs automatically after every save (no button needed)', autoJobs.slice(0, 3));
+  ok((await hanen.get('/api/recommendations?status=proposed')).data.length > 0, 'recommendations already exist before any manual "Analyser" click');
   r = await analyst.post('/api/analysis/run');
-  ok(r.data.ok && r.data.output.recommendations_created > 0, 'engine scan creates recommendations', r.data);
+  ok(r.data.ok && (await hanen.get('/api/recommendations?status=proposed')).data.length > 0, 'manual engine scan still available', r.data);
   const recos = (await hanen.get('/api/recommendations?status=proposed')).data;
   const nego = recos.find((x) => x.type === 'negotiation' && x.inputs.offer_id === swl1);
   ok(nego && nego.calc.ceiling && nego.risks && nego.data_freshness && nego.confidence > 0 && nego.missing_info, 'recommendation has inputs, formula, savings, risks, freshness, confidence, missing info');

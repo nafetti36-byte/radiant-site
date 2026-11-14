@@ -1,6 +1,7 @@
 import { h, api, clear, card, table, statusBadge, badge, tnd, pct, fmt, dateFmt, dtFmt, toast, guard, can, tabs, qs, setQs, modal, download, emptyState, lineChart, barChart, breakdownChart, confirmBox, buildForm, kpi } from './core.js';
 import { t } from './i18n.js';
 import { pageHead, actionBar, openEntityForm, openImport, runAnalysis } from './shared.js';
+import { calcContext, simulatePrice } from './live.js';
 
 const autoAdd = (fn) => { if (qs().get('add') === '1') { setQs({ add: null }); setTimeout(fn, 50); } };
 
@@ -100,30 +101,45 @@ export async function pricingPage(main) {
   if (!periods.length) { main.append(card(t('guided_setup'), emptyState('La simulation repose sur une période de production validée.', h('a', { class: 'btn btn-primary', href: '#/production?add=1' }, t('step_production'))))); return; }
   const out = h('div', { class: 'sim-out' });
   const pre = Number(qs().get('period')) || periods[0].id;
-  const form = buildForm([
-    { key: 'period_id', label: 'Période de base', type: 'select', required: true, default: pre, options: periods.map((x) => [x.id, `${x.machine} · ${x.product_grade} · ${x.period_end} · ${fmt(x.result.cost_per_saleable_t, 0)} TND/t`]) },
-    { key: 'current_price_tnd_t', label: 'Prix actuel TND/t (vide = prix moyen de la période)', type: 'number' },
-    { key: 'proposed_price_tnd_t', label: 'Prix proposé TND/t', type: 'number' },
-    { key: 'competitor_price_tnd_t', label: 'Prix concurrent TND/t', type: 'number' },
-    { key: 'fibre_price_change_pct', label: 'Variation prix fibre %', type: 'number', default: 0 },
-    { key: 'energy_price_change_pct', label: 'Variation prix énergie %', type: 'number', default: 0 },
-    { key: 'chemicals_change_pct', label: 'Variation chimie %', type: 'number', default: 0 },
-    { key: 'volume_change_pct', label: 'Variation volume %', type: 'number', default: 0 },
-    { key: 'target_margin_pct', label: 'Marge cible %', type: 'number' },
-    { key: 'name', label: 'Nom (pour enregistrer)', full: true },
-  ], {}, async (d) => {
-    const r = await api('/api/analysis/price-simulation', { method: 'POST', body: { ...d, save: !!d.name } });
-    const tile = (lab, at) => at ? kpi(lab, `${tnd(at.margin_tnd_t, 0)}/t`, { sub: `marge ${pct(at.margin_pct)} · profit ${tnd(at.profit_tnd)}`, kind: at.margin_tnd_t < 0 ? 'bad' : 'ok' }) : null;
+  const ctx = await calcContext().catch(() => ({ target_margin_pct: 12 }));
+  const tile = (lab, at) => at ? kpi(lab, `${tnd(at.margin_tnd_t, 0)}/t`, { sub: `marge ${pct(at.margin_pct)} · profit ${tnd(at.profit_tnd)}`, kind: at.margin_tnd_t < 0 ? 'bad' : 'ok' }) : null;
+  const render = (d) => {
+    const p = periods.find((x) => x.id === Number(d.period_id));
+    if (!p) return;
+    const current = d.current_price_tnd_t ?? p.avg_selling_price_tnd_t;
+    let r;
+    try {
+      r = simulatePrice({ base: p.result, saleable_t: p.saleable_t, fibre_price_change_pct: d.fibre_price_change_pct ?? 0, energy_price_change_pct: d.energy_price_change_pct ?? 0,
+        chemicals_change_pct: d.chemicals_change_pct ?? 0, volume_change_pct: d.volume_change_pct ?? 0, proposed_price_tnd_t: d.proposed_price_tnd_t ?? (d.price_change_pct && current ? current * (1 + d.price_change_pct / 100) : null),
+        current_price_tnd_t: current ?? null, competitor_price_tnd_t: d.competitor_price_tnd_t ?? null, target_margin_pct: d.target_margin_pct ?? ctx.target_margin_pct ?? 12 });
+    } catch (e) { out.replaceChildren(h('div', { class: 'verdict bad' }, e.message)); return; }
+    const proposed = d.proposed_price_tnd_t ?? (d.price_change_pct && current ? current * (1 + d.price_change_pct / 100) : null);
     out.replaceChildren(
-      h('div', { class: `verdict ${/^REFUS/.test(r.verdict) ? 'bad' : /^RISQUE/.test(r.verdict) ? 'warn' : 'ok'}` }, h('strong', {}, t('verdict')), ' : ', r.verdict),
+      h('div', { class: `verdict ${/^REFUS/.test(r.verdict) ? 'bad' : /^RISQUE/.test(r.verdict) ? 'warn' : 'ok'}` }, h('strong', {}, '⚡ ', t('verdict')), ' : ', r.verdict),
       h('div', { class: 'kpis kpis-sm' }, kpi(t('floor'), tnd(r.floor_price_short_term_t, 0)), kpi(t('break_even'), tnd(r.break_even_price_t, 0)), kpi(t('target_price'), tnd(r.target_price_t, 0)),
         tile('Au prix actuel', r.at_current_price), tile('Au prix proposé', r.at_proposed_price), tile('Au prix concurrent', r.at_competitor_price),
         r.profit_delta_tnd !== null ? kpi('Δ profit période', tnd(r.profit_delta_tnd), { sub: r.proposed_change_pct !== null ? `${pct(r.proposed_change_pct)} prix` : '', kind: r.profit_delta_tnd < 0 ? 'bad' : 'ok' }) : null),
-      barChart([{ label: 'Plancher', value: r.floor_price_short_term_t }, { label: 'Point mort', value: r.break_even_price_t }, { label: 'Cible', value: r.target_price_t, highlight: true }, ...(d.current_price_tnd_t || r.at_current_price ? [{ label: 'Actuel', value: d.current_price_tnd_t || (r.at_current_price ? r.at_current_price.margin_tnd_t + r.full_cost_t : 0) }] : []), ...(d.proposed_price_tnd_t ? [{ label: 'Proposé', value: d.proposed_price_tnd_t }] : []), ...(d.competitor_price_tnd_t ? [{ label: 'Concurrent', value: d.competitor_price_tnd_t }] : [])], { unit: 'TND/t' }),
-      r.saved_id ? h('p', { class: 'muted' }, `Simulation #${r.saved_id} enregistrée.`) : null);
-    if (r.saved_id) setTimeout(rerender, 1200);
-  }, { submitLabel: t('simulate') });
-  main.append(h('div', { class: 'grid-2' }, card(t('simulate'), form), card('Résultat', out)));
+      barChart([{ label: 'Plancher', value: r.floor_price_short_term_t }, { label: 'Point mort', value: r.break_even_price_t }, { label: 'Cible', value: r.target_price_t, highlight: true }, ...(current ? [{ label: 'Actuel', value: current }] : []), ...(proposed ? [{ label: 'Proposé', value: proposed }] : []), ...(d.competitor_price_tnd_t ? [{ label: 'Concurrent', value: d.competitor_price_tnd_t }] : [])], { unit: 'TND/t' }));
+  };
+  const form = buildForm([
+    { key: 'period_id', label: 'Période de base', type: 'select', required: true, default: pre, options: periods.map((x) => [x.id, `${x.machine} · ${x.product_grade} · ${x.period_end} · ${fmt(x.result.cost_per_saleable_t, 0)} TND/t`]) },
+    { key: 'price_change_pct', label: 'Variation de prix de vente % (ex. −5)', type: 'number', help: 'ou saisissez directement un prix proposé' },
+    { key: 'proposed_price_tnd_t', label: 'Prix proposé TND/t', type: 'number' },
+    { key: 'competitor_price_tnd_t', label: 'Prix concurrent TND/t', type: 'number' },
+    { key: 'current_price_tnd_t', label: 'Prix actuel TND/t (vide = prix moyen de la période)', type: 'number' },
+    { key: 'fibre_price_change_pct', label: 'Variation prix fibre %', type: 'number' },
+    { key: 'energy_price_change_pct', label: 'Variation prix énergie %', type: 'number' },
+    { key: 'chemicals_change_pct', label: 'Variation chimie %', type: 'number' },
+    { key: 'volume_change_pct', label: 'Variation volume %', type: 'number' },
+    { key: 'target_margin_pct', label: 'Marge cible %', type: 'number', placeholder: String(ctx.target_margin_pct ?? 12) },
+    { key: 'name', label: 'Nom (pour enregistrer)', full: true },
+  ], {}, async (d) => {
+    if (!d.name) throw new Error('Donnez un nom pour enregistrer la simulation (le calcul, lui, est déjà fait).');
+    const proposed = d.proposed_price_tnd_t ?? (d.price_change_pct ? (d.current_price_tnd_t ?? periods.find((x) => x.id === Number(d.period_id)).avg_selling_price_tnd_t) * (1 + d.price_change_pct / 100) : null);
+    const r = await api('/api/analysis/price-simulation', { method: 'POST', body: { ...d, proposed_price_tnd_t: proposed, save: true } });
+    toast(`Simulation #${r.saved_id} enregistrée`); setTimeout(rerender, 600);
+  }, { submitLabel: 'Enregistrer la simulation', onInput: render });
+  main.append(h('div', { class: 'grid-2' }, card(`${t('simulate')} — résultat instantané`, form), card('Résultat', out)));
   main.append(h('p', { class: 'muted small' }, 'Approuver un prix ici ne publie aucun tarif : les prix de vente restent décidés et publiés hors application par la Direction.'));
   main.append(card(t('simulations'), table([
     { key: 'created_at', label: t('date'), render: (s) => dtFmt(s.created_at) }, { key: 'name', label: 'Nom' }, { key: 'machine', label: 'Machine' },

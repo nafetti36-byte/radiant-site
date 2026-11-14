@@ -21,6 +21,16 @@ Hanen 360 is a Cloudflare Worker with a D1 database and a mobile-first web app. 
 
 ---
 
+## 0b. Automatic calculations (minimal data entry)
+
+- **Live calculation while typing** (`public/js/live.js`) in the offer form, the production period form, the price simulation and the ceiling calculator. The browser runs `public/js/engine.js`, compiled by `scripts/build-engine.mjs` from the **same** files as the server (`src/engine/fibre.ts`, `costing.ts`), so a preview always equals the saved result (an e2e test checks this).
+- **Smart pre-fill** (never overwrites a field already typed in):
+  - Offer: the supplier's last offer for the same grade (freight, processing, moisture, contamination, losses, payment terms, currency). Shows the change vs the previous price. The category follows the grade.
+  - Production: next period (the day after the last one → end of month), grade, tariffs (electricity, gas, steam, water), average fibre prices, fixed costs. **Consumption figures (kWh, Nm³, tonnes) are never estimated.**
+  - Totals: tonnes × price/t = fibre cost; gross − saleable = rejects.
+- **Automatic analysis after every save** (offers, prices, FX, production, imports, validations): recommendations and alerts update without clicking "Analyser" (job `auto_scan`).
+- **Quick entry** on the dashboard, plus one-tap activation of automatic exchange rates (admin).
+
 ## 1. What is in this release
 
 | Module | What it does |

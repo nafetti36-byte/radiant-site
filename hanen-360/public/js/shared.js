@@ -1,5 +1,6 @@
 import { h, api, modal, buildForm, toast, table, statusBadge, download, can, guard, fmt } from './core.js';
 import { t, L } from './i18n.js';
+import { attachOfferLive, attachProductionLive } from './live.js';
 
 export const GRADES_VP = ['BEKP', 'NBSK', 'BHKP', 'BSKP', 'FLUFF', 'OTHER_VP'];
 export const GRADES_REC = ['SWL', 'HWS', 'SOP'];
@@ -31,14 +32,14 @@ export const FIELDS = {
   offers: (category) => [
     { section: { fr: 'Offre', en: 'Offer', ar: 'العرض' } },
     { key: 'supplier_id', label: { fr: 'Fournisseur', en: 'Supplier', ar: 'المورد' }, type: 'select', required: true, options: () => window.__supplierOpts || [] },
-    { key: 'category', label: { fr: 'Catégorie', en: 'Category', ar: 'الفئة' }, type: 'select', required: true, default: category || 'recovered', options: [['virgin_pulp', { fr: 'Pâte vierge', en: 'Virgin pulp', ar: 'لب بكر' }], ['recovered', { fr: 'Papier recyclé', en: 'Recovered paper', ar: 'ورق مسترجع' }]] },
-    { key: 'grade', label: 'Grade', type: 'select', required: true, options: opt(category === 'virgin_pulp' ? GRADES_VP : category === 'recovered' ? GRADES_REC : [...GRADES_REC, ...GRADES_VP]) },
-    { key: 'offer_date', label: { fr: 'Date de l’offre', en: 'Offer date', ar: 'تاريخ العرض' }, type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
-    { key: 'valid_until', label: { fr: 'Valable jusqu’au', en: 'Valid until', ar: 'صالح حتى' }, type: 'date' },
+    { key: 'grade', label: 'Grade', type: 'select', required: true, options: opt(category === 'virgin_pulp' ? GRADES_VP : category === 'recovered' ? GRADES_REC : [...GRADES_REC, ...GRADES_VP]), help: { fr: 'La catégorie se règle seule', en: 'Category is set automatically', ar: 'تُضبط الفئة تلقائيًا' } },
     { key: 'price', label: { fr: 'Prix nominal / t', en: 'Nominal price / t', ar: 'السعر الاسمي / طن' }, type: 'number', required: true },
     { key: 'currency', label: { fr: 'Devise', en: 'Currency', ar: 'العملة' }, type: 'select', required: true, options: opt(CURRENCIES), default: 'EUR' },
-    { key: 'incoterm', label: 'Incoterm', placeholder: 'CFR Radès, DAP…' },
     { key: 'quantity_t', label: { fr: 'Quantité (t)', en: 'Quantity (t)', ar: 'الكمية (طن)' }, type: 'number' },
+    { key: 'offer_date', label: { fr: 'Date de l’offre', en: 'Offer date', ar: 'تاريخ العرض' }, type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
+    { key: 'valid_until', label: { fr: 'Valable jusqu’au', en: 'Valid until', ar: 'صالح حتى' }, type: 'date' },
+    { key: 'category', label: { fr: 'Catégorie', en: 'Category', ar: 'الفئة' }, type: 'select', required: true, default: category || 'recovered', options: [['virgin_pulp', { fr: 'Pâte vierge', en: 'Virgin pulp', ar: 'لب بكر' }], ['recovered', { fr: 'Papier recyclé', en: 'Recovered paper', ar: 'ورق مسترجع' }]] },
+    { key: 'incoterm', label: 'Incoterm', placeholder: 'CFR Radès, DAP…' },
     { key: 'payment_terms_days', label: { fr: 'Délai de paiement (j)', en: 'Payment terms (d)', ar: 'أجل الدفع' }, type: 'number' },
     { section: { fr: 'Coûts rendus et de transformation (TND/t)', en: 'Landed & conversion costs (TND/t)', ar: 'تكاليف الوصول والتحويل' } },
     { key: 'freight_tnd_t', label: { fr: 'Fret TND/t', en: 'Freight TND/t', ar: 'الشحن' }, type: 'number' },
@@ -79,15 +80,18 @@ export const FIELDS = {
     { section: { fr: 'Tonnages et performance', en: 'Tonnage & performance', ar: 'الكميات والأداء' } },
     { key: 'gross_t', label: { fr: 'Production brute (t)', en: 'Gross production (t)', ar: 'الإنتاج الإجمالي' }, type: 'number' },
     { key: 'saleable_t', label: { fr: 'Tonnage vendable (t)', en: 'Saleable tonnage (t)', ar: 'الكمية القابلة للبيع' }, type: 'number', required: true },
-    { key: 'rejects_t', label: { fr: 'Rebuts / casses (t)', en: 'Rejects / broke (t)', ar: 'المرفوضات' }, type: 'number' },
+    { key: 'avg_selling_price_tnd_t', label: { fr: 'Prix de vente moyen (TND/t)', en: 'Average selling price (TND/t)', ar: 'متوسط سعر البيع' }, type: 'number' },
+    { key: 'rejects_t', label: { fr: 'Rebuts / casses (t) — auto si brut saisi', en: 'Rejects / broke (t) — auto from gross', ar: 'المرفوضات' }, type: 'number' },
     { key: 'downtime_h', label: { fr: 'Arrêts (h)', en: 'Downtime (h)', ar: 'التوقفات (س)' }, type: 'number' },
     { key: 'available_h', label: { fr: 'Heures disponibles', en: 'Available hours', ar: 'الساعات المتاحة' }, type: 'number' },
     { key: 'closing_stock_t', label: { fr: 'Stock fin de période (t)', en: 'Closing stock (t)', ar: 'المخزون النهائي' }, type: 'number' },
     { section: { fr: 'Fibres', en: 'Fibre', ar: 'الألياف' } },
     { key: 'vp_t', label: { fr: 'Pâte vierge consommée (t)', en: 'Virgin pulp used (t)', ar: 'اللب البكر (طن)' }, type: 'number' },
-    { key: 'vp_cost_tnd', label: { fr: 'Coût pâte vierge (TND)', en: 'Virgin pulp cost (TND)', ar: 'تكلفة اللب البكر' }, type: 'number' },
+    { key: 'vp_price_tnd_t', virtual: true, label: { fr: 'Prix moyen pâte vierge (TND/t)', en: 'Avg virgin pulp price (TND/t)', ar: 'متوسط سعر اللب' }, type: 'number', help: { fr: 'Le coût total se calcule seul', en: 'Total cost is computed', ar: 'تُحسب التكلفة تلقائيًا' } },
+    { key: 'vp_cost_tnd', label: { fr: 'Coût pâte vierge (TND) — auto', en: 'Virgin pulp cost (TND) — auto', ar: 'تكلفة اللب البكر' }, type: 'number' },
     { key: 'recovered_t', label: { fr: 'Fibres recyclées consommées (t)', en: 'Recovered fibre used (t)', ar: 'الألياف المسترجعة' }, type: 'number' },
-    { key: 'recovered_cost_tnd', label: { fr: 'Coût fibres recyclées (TND)', en: 'Recovered fibre cost (TND)', ar: 'تكلفة المسترجع' }, type: 'number' },
+    { key: 'recovered_price_tnd_t', virtual: true, label: { fr: 'Prix moyen fibres recyclées (TND/t)', en: 'Avg recovered fibre price (TND/t)', ar: 'متوسط سعر المسترجع' }, type: 'number', help: { fr: 'Le coût total se calcule seul', en: 'Total cost is computed', ar: 'تُحسب التكلفة تلقائيًا' } },
+    { key: 'recovered_cost_tnd', label: { fr: 'Coût fibres recyclées (TND) — auto', en: 'Recovered fibre cost (TND) — auto', ar: 'تكلفة المسترجع' }, type: 'number' },
     { section: { fr: 'Énergie et eau', en: 'Energy & water', ar: 'الطاقة والمياه' } },
     { key: 'electricity_kwh', label: { fr: 'Électricité (kWh)', en: 'Electricity (kWh)', ar: 'الكهرباء' }, type: 'number' },
     { key: 'electricity_tariff', label: { fr: 'Tarif électricité (TND/kWh)', en: 'Electricity tariff (TND/kWh)', ar: 'تعريفة الكهرباء' }, type: 'number' },
@@ -106,7 +110,7 @@ export const FIELDS = {
     { key: 'fixed_overhead_tnd', label: { fr: 'Frais généraux fixes', en: 'Fixed overheads', ar: 'المصاريف الثابتة' }, type: 'number' },
     { key: 'variable_overhead_tnd', label: { fr: 'Frais généraux variables', en: 'Variable overheads', ar: 'المصاريف المتغيرة' }, type: 'number' },
     { key: 'freight_selling_tnd', label: { fr: 'Transport & frais de vente', en: 'Freight & selling', ar: 'النقل والبيع' }, type: 'number' },
-    { key: 'avg_selling_price_tnd_t', label: { fr: 'Prix de vente moyen (TND/t)', en: 'Average selling price (TND/t)', ar: 'متوسط سعر البيع' }, type: 'number' },
+
     { key: 'notes', label: { fr: 'Notes', en: 'Notes', ar: 'ملاحظات' }, type: 'textarea', full: true },
   ],
   savings: () => [
@@ -127,12 +131,16 @@ export async function openEntityForm(entity, { values = {}, id = null, category,
   if (entity === 'offers') window.__supplierOpts = await suppliersOptions(true);
   if (entity === 'offers' && !window.__supplierOpts.length) { toast({ fr: 'Créez d’abord un fournisseur', en: 'Create a supplier first', ar: 'أنشئ موردًا أولًا' }[document.documentElement.lang] || 'Créez d’abord un fournisseur', 'error'); return; }
   let m;
+  const preview = ['offers', 'production'].includes(entity) ? h('div') : null;
+  let live = null;
   const form = buildForm(FIELDS[entity](category), values, async (data) => {
     if (id) await api(`/api/${entity}/${id}`, { method: 'PUT', body: data });
     else await api(`/api/${entity}`, { method: 'POST', body: data });
     if (entity === 'suppliers') invalidateSuppliers();
-    m.close(); toast(t('saved')); onSaved?.();
-  });
+    m.close(); toast(['offers', 'production', 'market_prices', 'fx_rates'].includes(entity) ? `${t('saved')} — analyse mise à jour automatiquement` : t('saved')); onSaved?.();
+  }, { preview, onInput: preview ? (d, f) => live && live(d, f) : undefined });
+  if (entity === 'offers') attachOfferLive(form, preview, { id }).then((fn) => { live = fn; fn(form.getData(), form); });
+  if (entity === 'production') attachProductionLive(form, preview, { id }).then((fn) => { live = fn; fn(form.getData(), form); });
   m = modal(title || (id ? t('edit') : t('add')), form, { wide: ['offers', 'production'].includes(entity) });
 }
 

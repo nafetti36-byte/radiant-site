@@ -7,6 +7,7 @@ import { parseCsv } from '../lib/csv';
 import { readXlsx, writeXlsx } from '../lib/xlsx';
 import { sha256 } from '../lib/crypto';
 import { ENTITIES, mapHeaders } from './entities';
+import { autoAnalyze } from './data';
 import { extractQuote } from '../ai/extract';
 import { aiConfigured, aiErrorMessage } from '../ai/client';
 import { runJob } from '../jobs/runner';
@@ -79,6 +80,7 @@ async function commitBatch(c: Ctx, batchId: number) {
   stmts.push(c.env.DB.prepare("UPDATE h360_import_batches SET status='committed', committed_by=?, committed_at=datetime('now') WHERE id=?").bind(u.id, batchId));
   for (let i = 0; i < stmts.length; i += 50) await c.env.DB.batch(stmts.slice(i, i + 50));
   await auditCtx(c, 'import.commit', 'import_batches', batchId, { kind: b.kind, rows: stmts.length - 1 });
+  if (b.kind !== 'suppliers') autoAnalyze(c);
   return { inserted: stmts.length - 1 };
 }
 
@@ -207,6 +209,7 @@ export function importRoutes(r: Router) {
     const offerId = Number(ins.meta.last_row_id);
     await c.env.DB.prepare("UPDATE h360_inbound_docs SET status='converted', offer_id=? WHERE id=?").bind(offerId, d.id).run();
     await auditCtx(c, 'inbound.convert', 'offers', offerId, { inbound: d.id });
+    autoAnalyze(c);
     return json({ offer_id: offerId }, 201);
   });
   r.post('/api/inbound/:id/reject', async (c) => {

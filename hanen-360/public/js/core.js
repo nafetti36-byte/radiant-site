@@ -117,7 +117,7 @@ export function promptBox(title, label, { minLength = 0 } = {}) {
 
 // ───────── Generic form from field definitions ─────────
 // field: { key, label:{fr,en,ar}|string, type:'text'|'number'|'date'|'select'|'textarea'|'checkbox', options:[[v,label]], required, step, help, section }
-export function buildForm(fields, values = {}, onSubmit, { submitLabel } = {}) {
+export function buildForm(fields, values = {}, onSubmit, { submitLabel, onInput, preview, hideSubmit } = {}) {
   const inputs = {};
   const errBox = h('div', { class: 'form-error', role: 'alert' });
   const groups = [];
@@ -141,7 +141,30 @@ export function buildForm(fields, values = {}, onSubmit, { submitLabel } = {}) {
   }
   for (const g of groups) if (g.tagName === 'FIELDSET') g.classList.add('form-grid');
   const btn = h('button', { class: 'btn btn-primary', type: 'submit' }, submitLabel || t('save'));
-  const form = h('form', { class: 'form', novalidate: true }, ...groups, errBox, h('div', { class: 'form-actions' }, btn));
+  const previewBox = preview ? h('div', { class: 'live-preview', 'aria-live': 'polite' }, preview) : null;
+  const form = h('form', { class: 'form', novalidate: true }, ...groups, previewBox, errBox, hideSubmit ? null : h('div', { class: 'form-actions form-actions-sticky' }, btn));
+  const readValue = (f) => {
+    const i = inputs[f.key];
+    if (f.type === 'checkbox') return i.checked ? 1 : 0;
+    const raw = i.value.trim();
+    if (raw === '') return null;
+    if (f.type === 'number') { const n = Number(raw.replace(/\s/g, '').replace(',', '.')); return Number.isFinite(n) ? n : null; }
+    return raw;
+  };
+  form.getData = () => Object.fromEntries(fields.filter((f) => f.key).map((f) => [f.key, readValue(f)]));
+  form.setValue = (k, v, { silent } = {}) => {
+    const i = inputs[k]; if (!i) return;
+    if (i.type === 'checkbox') i.checked = !!v; else i.value = v === null || v === undefined ? '' : String(v);
+    i.classList.add('autofilled'); setTimeout(() => i.classList.remove('autofilled'), 900);
+    if (!silent) fire();
+  };
+  form.isEmpty = (k) => !inputs[k] || inputs[k].value.trim() === '';
+  form.inputs = inputs;
+  let tmr;
+  const fire = () => { if (!onInput) return; clearTimeout(tmr); tmr = setTimeout(() => { try { onInput(form.getData(), form); } catch (e) { console.error(e); } }, 120); };
+  form.addEventListener('input', fire);
+  form.addEventListener('change', fire);
+  if (onInput) setTimeout(fire, 0);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errBox.textContent = '';
@@ -150,9 +173,10 @@ export function buildForm(fields, values = {}, onSubmit, { submitLabel } = {}) {
     for (const f of fields) {
       if (!f.key) continue;
       const i = inputs[f.key];
-      data[f.key] = f.type === 'checkbox' ? (i.checked ? 1 : 0) : i.value.trim() === '' ? null : f.type === 'number' ? Number(i.value.replace(',', '.')) : i.value.trim();
+      data[f.key] = readValue(f);
       if (f.required && (data[f.key] === null || data[f.key] === '')) { i.closest('.field').querySelector('.field-err').textContent = t('required'); i.focus(); return; }
     }
+    for (const f of fields) if (f.virtual) delete data[f.key];
     btn.disabled = true;
     try { await onSubmit(data); }
     catch (err) {

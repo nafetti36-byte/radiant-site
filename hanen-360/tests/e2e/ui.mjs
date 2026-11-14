@@ -81,6 +81,47 @@ async function main() {
     await page.waitForSelector('text=Fournisseur UI Test');
     ok(true, 'supplier created from the mobile form appears in the list');
 
+    // Live calculations: offer form (pre-fill + instant ceiling verdict)
+    await page.goto(`${BASE}/#/dashboard`); await page.waitForSelector('.quick-btn');
+    await page.click('.quick-btn:has-text("Offre fournisseur")');
+    await page.waitForSelector('.modal select[name=supplier_id]');
+    const capId = await page.$eval('.modal select[name=supplier_id]', (s) => [...s.options].find((o) => o.text === 'Recyclage Cap Bon').value);
+    await page.selectOption('.modal select[name=supplier_id]', capId);
+    await page.selectOption('.modal select[name=grade]', 'SWL');
+    await page.waitForFunction(() => document.querySelector('.modal input[name=processing_tnd_t]').value === '80', null, { timeout: 8000 }).catch(() => {});
+    ok(await page.inputValue('.modal input[name=processing_tnd_t]') === '80' && await page.inputValue('.modal select[name=category]') === 'recovered', 'offer form auto-fills costs from history and sets category from grade');
+    await page.fill('.modal input[name=price]', '1800');
+    await page.waitForFunction(() => document.querySelector('.live-preview')?.textContent.includes('Au-dessus du plafond'), null, { timeout: 5000 }).catch(() => {});
+    const pv = await page.textContent('.live-preview');
+    ok(pv.includes('Coût effectif') && pv.includes('Prix maximum') && pv.includes('Au-dessus du plafond') && pv.includes('Offre précédente'), 'typing a price shows effective cost, ceiling, target and verdict instantly', pv.slice(0, 300));
+    await page.screenshot({ path: `${OUT}/iphone-offer-live.png` });
+    await page.click('.modal .modal-head button');
+
+    // Live calculations: production form
+    await page.click('.quick-btn:has-text("Période PM1")');
+    await page.waitForSelector('.modal select[name=machine]');
+    await page.selectOption('.modal select[name=machine]', 'PM1');
+    await page.waitForFunction(() => document.querySelector('.modal input[name=electricity_tariff]').value !== '', null, { timeout: 8000 }).catch(() => {});
+    ok(await page.inputValue('.modal input[name=electricity_tariff]') === '0.3' && await page.inputValue('.modal input[name=period_start]') === '2026-11-01' && await page.inputValue('.modal input[name=electricity_kwh]') === '', 'production form pre-fills dates & tariffs, leaves consumptions empty');
+    await page.fill('.modal input[name=saleable_t]', '900');
+    await page.fill('.modal input[name=gross_t]', '950');
+    await page.fill('.modal input[name=vp_t]', '350');
+    await page.fill('.modal input[name=vp_price_tnd_t]', '2400');
+    await page.fill('.modal input[name=electricity_kwh]', '820000');
+    await page.waitForTimeout(400);
+    ok(await page.inputValue('.modal input[name=vp_cost_tnd]') === '840000' && await page.inputValue('.modal input[name=rejects_t]') === '50', 'totals and rejects computed automatically (350 t × 2400 = 840 000; 950 − 900 = 50)');
+    const pp = await page.textContent('.live-preview');
+    ok(pp.includes('Coût / t vendable') && pp.includes('Prix cible'), 'cost per tonne and target price shown while typing', pp.slice(0, 200));
+    await page.screenshot({ path: `${OUT}/iphone-production-live.png` });
+    await page.click('.modal .modal-head button');
+
+    // Live pricing simulation
+    await page.goto(`${BASE}/#/pricing`); await page.waitForSelector('input[name=price_change_pct]');
+    await page.fill('input[name=price_change_pct]', '-5');
+    await page.waitForFunction(() => document.querySelector('.sim-out .verdict'), null, { timeout: 5000 }).catch(() => {});
+    ok((await page.textContent('.sim-out')).includes('Δ profit'), 'price simulation updates instantly (−5 % → profit impact)');
+    await page.screenshot({ path: `${OUT}/iphone-pricing-live.png` });
+
     // Decision workflow from the phone
     await page.goto(`${BASE}/#/ai?tab=decisions`);
     await page.waitForSelector('.reco');

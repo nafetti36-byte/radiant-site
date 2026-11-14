@@ -4,6 +4,16 @@ import { HttpError, assertValid, json, readJson, validate } from '../lib/http';
 import { require as requirePerm } from '../lib/auth';
 import { auditCtx } from '../lib/audit';
 import { ENTITIES } from './entities';
+import { runJob } from '../jobs/runner';
+import { runEngineScan } from '../engine/recommend';
+import { fibreAnalysis } from '../engine/data';
+import { getSettings, num } from '../lib/settings';
+
+const AUTO_ENTITIES = new Set(['offers', 'market_prices', 'production', 'fx_rates']);
+/** Re-runs the recommendation/alert engine after every data change (no "Analyser" click needed). */
+export function autoAnalyze(c: Ctx) {
+  c.exec.waitUntil(runJob(c.env, 'auto_scan', 'procurement_analyst', `auto:${c.user?.email ?? 'system'}`, null, () => runEngineScan(c.env)));
+}
 
 const id = (c: Ctx) => { const n = Number(c.params.id); if (!Number.isInteger(n) || n < 1) throw new HttpError(400, 'id invalide'); return n; };
 
@@ -62,6 +72,7 @@ function entityRoutes(r: Router, name: string) {
       .bind(...keys.map((k) => value[k]), ...Object.values(extra)).run();
     const newId = Number(res.meta.last_row_id);
     await auditCtx(c, `${name}.create`, name, newId, value);
+    if (AUTO_ENTITIES.has(name)) autoAnalyze(c);
     return json({ id: newId }, 201);
   });
   r.put(`/api/${name}/:id`, async (c) => {
@@ -79,6 +90,7 @@ function entityRoutes(r: Router, name: string) {
       .bind(...keys.map((k) => value[k]), rid).run();
     const changed = Object.fromEntries(keys.filter((k) => (before as any)[k] !== value[k]).map((k) => [k, [(before as any)[k], value[k]]]));
     await auditCtx(c, `${name}.update`, name, rid, changed);
+    if (AUTO_ENTITIES.has(name)) autoAnalyze(c);
     return json({ ok: true });
   });
   r.del(`/api/${name}/:id`, async (c) => {
@@ -93,6 +105,7 @@ function entityRoutes(r: Router, name: string) {
     if (name === 'offers') await c.env.DB.prepare('DELETE FROM h360_negotiations WHERE offer_id=?').bind(rid).run();
     await c.env.DB.prepare(`DELETE FROM ${spec.table} WHERE id=?`).bind(rid).run();
     await auditCtx(c, `${name}.delete`, name, rid, row);
+    if (AUTO_ENTITIES.has(name)) autoAnalyze(c);
     return json({ ok: true });
   });
 }
@@ -114,6 +127,55 @@ async function crossChecks(c: Ctx, name: string, v: Record<string, any>) {
 }
 
 export function dataRoutes(r: Router) {
+  // ── Smart defaults & calculation context for live previews (registered before /:id routes)
+  r.get('/api/defaults/context', async (c) => {
+    requirePerm(c, 'read');
+    const [f, s] = await Promise.all([fibreAnalysis(c.env), getSettings(c.env)]);
+    return json({
+      fx: Object.fromEntries(Object.entries(f.fx).map(([k, v]) => [k, v.rate])), fx_dates: Object.fromEntries(Object.entries(f.fx).map(([k, v]) => [k, v.date])),
+      references: f.references, fin: f.settings.fin, negotiation_margin_pct: f.settings.negotiation_margin_pct, target_margin_pct: num(s, 'target_margin_pct', 12),
+      vp_reference: { SWL: s.vp_reference_SWL, HWS: s.vp_reference_HWS, SOP: s.vp_reference_SOP },
+      quality_equivalence: { SWL: num(s, 'quality_equivalence_SWL', 95), HWS: num(s, 'quality_equivalence_HWS', 90), SOP: num(s, 'quality_equivalence_SOP', 92) },
+      best_by_grade: Object.fromEntries(Object.entries(f.ranking).map(([g, list]) => [g, list[0] ?? null])),
+    });
+  });
+  r.get('/api/defaults/offer', async (c) => {
+    requirePerm(c, 'read');
+    const sid = Number(c.url.searchParams.get('supplier_id')) || null;
+    const grade = c.url.searchParams.get('grade') || null;
+    const cols = 'id, supplier_id, grade, category, currency, incoterm, quantity_t, freight_tnd_t, customs_pct, handling_tnd_t, processing_tnd_t, energy_extra_tnd_t, chemicals_extra_tnd_t, other_tnd_t, moisture_pct, contamination_pct, process_loss_pct, payment_terms_days, price, offer_date';
+    const tries: [string, unknown[], string][] = [];
+    if (sid && grade) tries.push(['supplier_id = ? AND grade = ?', [sid, grade], 'dernière offre de ce fournisseur pour ce grade']);
+    if (grade) tries.push(['grade = ?', [grade], 'dernière offre de ce grade (autre fournisseur)']);
+    if (sid) tries.push(['supplier_id = ?', [sid], 'dernière offre de ce fournisseur']);
+    let last: any = null, basis = '';
+    for (const [w, b, label] of tries) { last = await c.env.DB.prepare(`SELECT ${cols} FROM h360_offers WHERE ${w} ORDER BY offer_date DESC, id DESC LIMIT 1`).bind(...b).first(); if (last) { basis = label; break; } }
+    const sup: any = sid ? await c.env.DB.prepare('SELECT payment_terms_days, incoterm, categories FROM h360_suppliers WHERE id=?').bind(sid).first() : null;
+    const values: Record<string, unknown> = {};
+    if (last) for (const k of ['currency', 'incoterm', 'freight_tnd_t', 'customs_pct', 'handling_tnd_t', 'processing_tnd_t', 'energy_extra_tnd_t', 'chemicals_extra_tnd_t', 'other_tnd_t', 'moisture_pct', 'contamination_pct', 'process_loss_pct', 'payment_terms_days', 'quantity_t']) if (last[k] !== null && last[k] !== undefined) values[k] = last[k];
+    if (sup?.payment_terms_days && values.payment_terms_days === undefined) values.payment_terms_days = sup.payment_terms_days;
+    if (sup?.incoterm && !values.incoterm) values.incoterm = sup.incoterm;
+    return json({ values, basis, previous_price: last && last.supplier_id === sid && last.grade === grade ? { price: last.price, currency: last.currency, date: last.offer_date, id: last.id } : null, supplier_categories: sup?.categories ?? null });
+  });
+  r.get('/api/defaults/production', async (c) => {
+    requirePerm(c, 'read');
+    const m = c.url.searchParams.get('machine');
+    if (!['PM1', 'PM2'].includes(m || '')) throw new HttpError(422, 'machine requise');
+    const p: any = await c.env.DB.prepare("SELECT * FROM h360_production_periods WHERE machine=? AND validation_status='validated' ORDER BY period_end DESC LIMIT 1").bind(m).first();
+    if (!p) return json({ values: {}, basis: null, unit: {} });
+    const next = new Date(new Date(p.period_end + 'T00:00:00Z').getTime() + 86400000);
+    const end = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0));
+    const values: Record<string, unknown> = { period_start: next.toISOString().slice(0, 10), period_end: end.toISOString().slice(0, 10), product_grade: p.product_grade };
+    for (const k of ['electricity_tariff', 'gas_tariff', 'steam_cost_tnd_t', 'water_tariff', 'available_h']) if (p[k]) values[k] = p[k];
+    const per = (a: number, b: number) => (b > 0 && a > 0 ? Math.round((a / b) * 100) / 100 : null);
+    return json({
+      values, basis: `période ${p.period_start} → ${p.period_end}`,
+      unit: { vp_price_tnd_t: per(p.vp_cost_tnd, p.vp_t), recovered_price_tnd_t: per(p.recovered_cost_tnd, p.recovered_t) },
+      fixed: { labour_tnd: p.labour_tnd, maintenance_tnd: p.maintenance_tnd, fixed_overhead_tnd: p.fixed_overhead_tnd },
+      last: { saleable_t: p.saleable_t, avg_selling_price_tnd_t: p.avg_selling_price_tnd_t },
+    });
+  });
+
   for (const n of Object.keys(ENTITIES)) entityRoutes(r, n);
 
   // ── Offer workflow actions
@@ -124,6 +186,7 @@ export function dataRoutes(r: Router) {
     await c.env.DB.prepare("UPDATE h360_offers SET validation_status=?, status=CASE WHEN ?='validated' AND status='pending_validation' THEN 'active' WHEN ?='rejected' THEN 'rejected' ELSE status END, validated_by=?, validated_at=datetime('now'), updated_at=datetime('now') WHERE id=?")
       .bind(decision, decision, decision, u.id, id(c)).run();
     await auditCtx(c, `offers.${decision}`, 'offers', id(c));
+    autoAnalyze(c);
     return json({ ok: true });
   });
   r.post('/api/offers/:id/quality', async (c) => {
@@ -132,6 +195,7 @@ export function dataRoutes(r: Router) {
     if (!['pending', 'approved', 'rejected', 'not_tested'].includes(b.quality_status)) throw new HttpError(422, 'Statut qualité invalide');
     await c.env.DB.prepare("UPDATE h360_offers SET quality_status=?, quality_notes=?, updated_at=datetime('now') WHERE id=?").bind(b.quality_status, String(b.quality_notes || '').slice(0, 2000), id(c)).run();
     await auditCtx(c, 'offers.quality', 'offers', id(c), { quality_status: b.quality_status });
+    autoAnalyze(c);
     return json({ ok: true });
   });
   r.post('/api/offers/:id/ceiling-exception', async (c) => {
@@ -165,6 +229,7 @@ export function dataRoutes(r: Router) {
     const st = b.decision === 'reject' ? 'rejected' : 'validated';
     await c.env.DB.prepare('UPDATE h360_market_prices SET validation_status=? WHERE id=?').bind(st, id(c)).run();
     await auditCtx(c, `market_prices.${st}`, 'market_prices', id(c));
+    autoAnalyze(c);
     return json({ ok: true });
   });
   r.post('/api/production/:id/validate', async (c) => {
@@ -173,6 +238,7 @@ export function dataRoutes(r: Router) {
     const st = b.decision === 'reject' ? 'rejected' : 'validated';
     await c.env.DB.prepare("UPDATE h360_production_periods SET validation_status=?, updated_at=datetime('now') WHERE id=?").bind(st, id(c)).run();
     await auditCtx(c, `production.${st}`, 'production', id(c));
+    autoAnalyze(c);
     return json({ ok: true });
   });
 

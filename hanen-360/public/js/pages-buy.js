@@ -1,6 +1,7 @@
 import { h, api, clear, card, table, statusBadge, badge, tnd, pct, fmt, dateFmt, toast, guard, can, tabs, qs, setQs, modal, download, emptyState, lineChart, barChart, breakdownChart, confirmBox, promptBox, buildForm, kpi } from './core.js';
 import { t, L } from './i18n.js';
 import { pageHead, actionBar, openEntityForm, openImport, runAnalysis, money, suppliersOptions, GRADES_REC, CURRENCIES } from './shared.js';
+import { calcContext, renderOfferPreview } from './live.js';
 
 const autoAdd = (fn) => { if (qs().get('add') === '1') { setQs({ add: null }); setTimeout(fn, 50); } };
 
@@ -260,20 +261,14 @@ export async function recoveredPage(main) {
 }
 
 function calculator() {
-  const out = h('div', { class: 'calc-out' });
+  const out = h('div', { class: 'live-preview' });
+  let ctx = null;
   const form = buildForm([
     { key: 'grade', label: 'Grade', type: 'select', required: true, options: GRADES_REC.map((g) => [g, g]) },
     { key: 'price', label: 'Prix proposé / t', type: 'number', required: true }, { key: 'currency', label: 'Devise', type: 'select', required: true, options: CURRENCIES.map((c) => [c, c]), default: 'TND' },
-    { key: 'freight_tnd_t', label: 'Fret TND/t', type: 'number' }, { key: 'processing_tnd_t', label: 'Tri/désencrage TND/t', type: 'number' }, { key: 'energy_extra_tnd_t', label: 'Énergie incr. TND/t', type: 'number' },
-    { key: 'chemicals_extra_tnd_t', label: 'Chimie incr. TND/t', type: 'number' }, { key: 'moisture_pct', label: 'Humidité %', type: 'number', default: 10 }, { key: 'contamination_pct', label: 'Contaminants %', type: 'number' },
-    { key: 'process_loss_pct', label: 'Pertes process %', type: 'number' }, { key: 'payment_terms_days', label: 'Paiement j', type: 'number' }, { key: 'quantity_t', label: 'Quantité t', type: 'number' },
-  ], {}, async (d) => {
-    const r = await api('/api/analysis/ceiling', { method: 'POST', body: d });
-    out.replaceChildren(h('div', { class: 'kpis kpis-sm' },
-      kpi(t('effective_cost'), `${fmt(r.cost.effective_tnd_per_usable_t, 1)} ${t('per_usable_t')}`, { sub: `${t('yield')} ${pct(r.cost.usable_yield * 100, 2)}` }),
-      r.ceiling ? kpi(t('ceiling'), money(r.ceiling.ceiling, d.currency), { sub: r.ceiling.ceiling_rule === 'vp_nominal_cap' ? 'règle : ≤ prix pâte vierge' : 'parité coût effectif', kind: d.price > r.ceiling.ceiling ? 'bad' : 'ok' }) : kpi(t('ceiling'), '—', { sub: r.missing }),
-      r.negotiation ? kpi(t('target'), money(r.negotiation.target_price, d.currency), { sub: r.negotiation.expected_savings_tnd ? tnd(r.negotiation.expected_savings_tnd) : `${fmt(r.negotiation.expected_savings_tnd_t, 1)} TND/t` }) : null),
-      h('code', { class: 'formula' }, r.cost.formula), r.ceiling ? h('code', { class: 'formula' }, r.ceiling.formula) : null);
-  }, { submitLabel: t('compute') });
-  return h('div', {}, form, out);
+    { key: 'quantity_t', label: 'Quantité t', type: 'number' }, { key: 'moisture_pct', label: 'Humidité %', type: 'number', default: 10 }, { key: 'contamination_pct', label: 'Contaminants %', type: 'number' },
+    { key: 'process_loss_pct', label: 'Pertes process %', type: 'number' }, { key: 'freight_tnd_t', label: 'Fret TND/t', type: 'number' }, { key: 'processing_tnd_t', label: 'Tri/désencrage TND/t', type: 'number' },
+    { key: 'energy_extra_tnd_t', label: 'Énergie incr. TND/t', type: 'number' }, { key: 'chemicals_extra_tnd_t', label: 'Chimie incr. TND/t', type: 'number' }, { key: 'payment_terms_days', label: 'Paiement j', type: 'number' },
+  ], {}, async () => {}, { hideSubmit: true, onInput: async (d) => { ctx ||= await calcContext(); renderOfferPreview(out, { ...d, category: 'recovered' }, ctx); } });
+  return h('div', {}, h('p', { class: 'muted small' }, 'Tapez un prix : plafond, cible et économie s’affichent instantanément.'), form, out);
 }
