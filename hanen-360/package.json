@@ -1,0 +1,28 @@
+{
+  "name": "hanen-360",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "deploy": "wrangler deploy",
+    "test:ui": "node tests/e2e/ui.mjs",
+    "test": "npm run typecheck && npm run test:unit && npm run test:e2e && npm run test:ui",
+    "backup": "bash scripts/backup.sh",
+    "preflight": "bash scripts/preflight.sh"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261114.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.162.0"
+  }
+}

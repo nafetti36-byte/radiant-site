@@ -1,0 +1,6 @@
+node_modules/
+.wrangler/
+.dev.vars
+backups/
+test-results/
+tests/e2e/.xlsx-build.mjs

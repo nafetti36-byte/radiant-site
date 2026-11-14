@@ -1,0 +1,39 @@
+# Hanen 360 — Azur Papier industrial intelligence platform
+# IMPORTANT: set database_id to the EXISTING D1 database used by hanen-360
+# (see `npx wrangler d1 list`). All new tables are prefixed `h360_` so existing
+# tables and records are never modified.
+name = "hanen-360"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/__scheduled"]  # /__scheduled only used by `wrangler dev --test-scheduled`
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hanen-360-db"
+database_id = "REPLACE_WITH_EXISTING_D1_DATABASE_ID"
+migrations_dir = "migrations"
+migrations_table = "h360_d1_migrations"
+
+[triggers]
+# 05:00 UTC daily (06:00 Tunis): FX update, cost recalculation, alerts, ranking, daily report
+# 06:00 UTC Monday: weekly savings report
+crons = ["0 5 * * *", "0 6 * * 1"]
+
+[vars]
+APP_ENV = "production"
+AI_MODEL = "claude-opus-5-5"
+
+[observability]
+enabled = true
+
+# Secrets (never commit values) — set with `npx wrangler secret put <NAME>`:
+#   SETUP_TOKEN          one-time first-administrator activation token (delete after use)
+#   ANTHROPIC_API_KEY    Hanen AI (Claude) — optional; AI shows "Connexion requise" without it
+#   NOTIFY_WEBHOOK_URL   optional Teams/Slack-compatible incoming webhook for alerts/reports
+#   PULP_FEED_URL / PULP_FEED_TOKEN   optional licensed pulp price feed (JSON)
