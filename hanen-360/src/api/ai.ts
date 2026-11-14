@@ -6,8 +6,38 @@ import { AGENTS, DIRECTOR } from '../ai/agents';
 import { TOOLS } from '../ai/tools';
 import { aiConfigured, aiErrorMessage, model } from '../ai/client';
 import { chat, runSpecialist } from '../ai/advisor';
+import { answer, INTENTS } from '../engine/assistant';
+import { upsertRecommendation } from '../engine/recommend';
+import { runJob } from '../jobs/runner';
+
+const INTENT_AGENT: Record<string, string> = { max_price: 'recovered_paper_analyst', best_supplier: 'procurement_analyst', cost_increase: 'manufacturing_cost_engineer', price_change: 'pricing_strategist', pulp_drop: 'recovered_paper_analyst', savings: 'financial_controller', buy_now: 'virgin_pulp_market' };
 
 export function aiRoutes(r: Router) {
+  // ── Free built-in assistant (no external AI, no cost)
+  r.post('/api/assistant', async (c) => {
+    const u = requirePerm(c, 'read');
+    const b = await readJson<any>(c.req);
+    if (!(INTENTS as readonly string[]).includes(b.intent)) throw new HttpError(422, 'Question inconnue');
+    const res = await runJob(c.env, `assistant:${b.intent}`, INTENT_AGENT[b.intent], `user:${u.email}`, b.params ?? {}, () => answer(c.env, b.intent, b.params ?? {}, b.lang));
+    if (!res.ok) throw new HttpError(500, res.error || 'Erreur');
+    return json(res.output);
+  });
+  r.post('/api/assistant/propose', async (c) => {
+    const u = requirePerm(c, 'write');
+    const b = await readJson<any>(c.req);
+    if (!(INTENTS as readonly string[]).includes(b.intent)) throw new HttpError(422, 'Question inconnue');
+    const a = await answer(c.env, b.intent, b.params ?? {}, 'fr'); // recomputed server-side, never trusted from the browser
+    if (!a.sources.length) throw new HttpError(422, 'Données insuffisantes pour proposer une décision');
+    const rec = await upsertRecommendation(c.env, {
+      slot: `assistant:${a.intent}:${JSON.stringify(b.params ?? {})}`, module: a.module, type: `assistant_${a.intent}`, title: a.title, summary: a.verdict,
+      reasoning: a.points.join('\n'), inputs: { sources: a.sources, params: b.params ?? {}, requested_by: u.email }, calc: { formula: a.formula ?? null, table: a.table ?? null },
+      savings_tnd: a.savings_tnd ?? null, risks: a.missing.join(' ; ') || 'Validation qualité requise pour toute substitution', data_freshness: a.sources.slice(0, 4).join(' ; '),
+      confidence: a.confidence, missing_info: a.missing.join(' ; ') || 'aucune', created_by: `assistant:${INTENT_AGENT[a.intent]}`,
+    });
+    await auditCtx(c, 'assistant.propose', 'recommendations', rec.id, { intent: a.intent });
+    return json({ id: rec.id, created: rec.created });
+  });
+
   r.get('/api/ai/status', async (c) => {
     requirePerm(c, 'read');
     const running = (await c.env.DB.prepare("SELECT agent, type, started_at FROM h360_jobs WHERE status='running' AND agent IS NOT NULL").all<any>()).results;

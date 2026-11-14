@@ -140,6 +140,8 @@ async function suite() {
 
   r = await hanen.get('/api/dashboard');
   ok(r.data.setup_complete === false && r.data.setup.every((s) => !s.done), 'empty database shows guided setup (no fake data)');
+  r = await hanen.post('/api/assistant', { intent: 'max_price', params: { grade: 'SWL' }, lang: 'fr' });
+  ok(r.status === 200 && r.data.verdict === 'Données insuffisantes' && r.data.missing.length && !r.data.sources.length, 'free assistant on empty data says what is missing (never invents numbers)', r.data);
 
   results.push('Phase 2 — industrial data & engines');
   r = await admin.post('/api/admin/connectors/fx', { enabled: true, test: true });
@@ -308,7 +310,31 @@ async function suite() {
   ok((await csvExp.text()).includes('grade'), 'export CSV');
   ok((await viewer.req('GET', '/api/export/audit', undefined, { raw: true })).status === 403, 'audit export restricted to admin');
 
-  results.push('Phase 4 — Hanen AI');
+  results.push('Phase 4 — Hanen AI (free assistant + Claude)');
+  const num = (x) => Number(String(x).replace(/\s/g, '').replace(',', '.'));
+  const fibreNow = (await hanen.get('/api/analysis/fibre')).data;
+  const swlBest = fibreNow.offers.filter((o) => o.grade === 'SWL' && o.negotiation && o.validation_status === 'validated').sort((a, b) => a.cost.effective_tnd_per_usable_t - b.cost.effective_tnd_per_usable_t)[0];
+  r = await viewer.post('/api/assistant', { intent: 'max_price', params: { grade: 'SWL' }, lang: 'fr' });
+  const maxRow = r.data.table?.rows.find((row) => row[0] === swlBest.supplier_name);
+  ok(r.status === 200 && r.data.verdict.includes(swlBest.supplier_name) && maxRow && Math.abs(num(maxRow[3]) - swlBest.negotiation.max_price) < 0.01, 'assistant: max SWL price = engine ceiling of the best offer', { verdict: r.data.verdict, row: maxRow, want: swlBest.negotiation.max_price });
+  r = await hanen.post('/api/assistant', { intent: 'best_supplier', params: {}, lang: 'en' });
+  ok(r.status === 200 && r.data.table.rows.length >= 3 && /lowest/.test(r.data.verdict), 'assistant: best supplier ranking (English)');
+  r = await hanen.post('/api/assistant', { intent: 'pulp_drop', params: { pct: 8 }, lang: 'fr' });
+  ok(r.status === 200 && r.data.table.rows.length > 0 && r.data.table.rows.every((row) => num(row[4]) < num(row[3])), 'assistant: −8 % pulp lowers every recovered ceiling', r.data.table);
+  r = await hanen.post('/api/assistant', { intent: 'price_change', params: { machine: 'PM1', pct: -5 }, lang: 'fr' });
+  ok(r.status === 200 && /point mort/i.test(r.data.verdict), 'assistant: −5 % Jumbo Roll price evaluated against break-even', r.data.verdict);
+  r = await hanen.post('/api/assistant', { intent: 'cost_increase', params: { machine: 'PM1' }, lang: 'ar' });
+  ok(r.status === 200 && r.data.points.length > 0 && /[؀-ۿ]/.test(r.data.verdict), 'assistant: cost increase explained (Arabic)');
+  r = await hanen.post('/api/assistant', { intent: 'savings', params: { target: 100000 }, lang: 'fr' });
+  ok(r.status === 200 && r.data.savings_tnd > 0 && r.data.table.rows.length > 0, 'assistant: savings plan towards 100 000 TND', r.data.verdict);
+  r = await hanen.post('/api/assistant', { intent: 'buy_now', params: { grade: 'BEKP' }, lang: 'fr' });
+  ok(r.status === 200 && /NÉGOCIER|ACHETER|stable/i.test(r.data.verdict), 'assistant: buy pulp now or negotiate', r.data.verdict);
+  ok((await viewer.post('/api/assistant/propose', { intent: 'savings', params: { target: 100000 } })).status === 403, 'viewer can ask but cannot propose decisions');
+  r = await analyst.post('/api/assistant/propose', { intent: 'savings', params: { target: 100000 } });
+  const prop = (await hanen.get('/api/recommendations?status=proposed')).data.find((x) => x.id === r.data.id);
+  ok(r.status === 200 && prop && prop.created_by.startsWith('assistant:') && prop.savings_tnd > 0, 'assistant answer becomes a recommendation for Hanen’s approval', prop);
+  ok((await hanen.post('/api/assistant', { intent: 'hack', params: {} })).status === 422, 'unknown assistant question rejected');
+
   const st = (await hanen.get('/api/ai/status')).data;
   ok(st.configured && st.agents.length === 15 && st.agents.every((a) => a.tools.length && a.active.length === 0), '15 specialist agents defined with tools; none shown active when idle');
   ok(!st.director.tools.some((t) => /purchase|send|sign|publish|pay/i.test(t.name)), 'no tool can purchase, contact suppliers, sign or publish prices');

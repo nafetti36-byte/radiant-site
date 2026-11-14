@@ -122,6 +122,18 @@ async function main() {
     ok((await page.textContent('.sim-out')).includes('Δ profit'), 'price simulation updates instantly (−5 % → profit impact)');
     await page.screenshot({ path: `${OUT}/iphone-pricing-live.png` });
 
+    // Free assistant on the phone
+    await page.goto(`${BASE}/#/ai`); await page.waitForSelector('.q-card');
+    ok((await page.$$('.q-card')).length === 7, 'free assistant shows 7 ready questions when no paid AI is configured');
+    await page.click('.q-card:first-child button.btn-primary');
+    await page.waitForSelector('.q-card:first-child .answer .lp-verdict', { timeout: 10000 }).catch(() => {});
+    const ans = await page.textContent('.q-card:first-child').catch(() => '');
+    ok(/Ne pas dépasser|Meilleur coût/.test(ans), 'tapping "Répondre" gives an instant answer from the data', ans.slice(0, 200));
+    await page.waitForTimeout(4500);
+    await page.$eval('.q-card:first-child .answer', (e) => e.scrollIntoView({ block: 'start' })).catch(() => {});
+    await page.evaluate(() => window.scrollBy(0, -70));
+    await page.screenshot({ path: `${OUT}/iphone-assistant.png` });
+
     // Decision workflow from the phone
     await page.goto(`${BASE}/#/ai?tab=decisions`);
     await page.waitForSelector('.reco');

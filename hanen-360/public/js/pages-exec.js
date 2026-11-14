@@ -1,5 +1,6 @@
 import { h, api, session, clear, kpi, card, tnd, pct, fmt, lineChart, breakdownChart, statusBadge, table, emptyState, dateFmt, dtFmt, toast, guard, can, tabs, qs, setQs, promptBox, download, badge } from './core.js';
 import { t, L, getLang } from './i18n.js';
+const AL = (o) => L(o);
 import { pageHead, actionBar, runAnalysis, openImport, openEntityForm } from './shared.js';
 
 // ═════════ Tableau de Direction ═════════
@@ -83,17 +84,18 @@ const EXAMPLES = {
 };
 
 export async function aiPage(main) {
-  const tab = qs().get('tab') || 'chat';
   const status = await api('/api/ai/status');
+  const tab = qs().get('tab') || (status.configured ? 'chat' : 'assistant');
   clear(main);
   main.append(h('div', { class: 'ai-hero' }, h('div', { class: 'ai-mark', 'aria-hidden': 'true' }, '✦'), h('div', {}, h('h1', {}, t('ai_title')), h('p', { class: 'sub' }, t('ai_sub'))),
-    h('div', { class: 'ai-conn' }, status.configured ? badge(`${t('connected')} · ${status.model}`, 'ok') : badge(t('connexion_requise'), 'warn'))));
-  main.append(tabs([['chat', t('ai_chat')], ['decisions', t('decisions')], ['team', t('ai_team')]], tab, (x) => { setQs({ tab: x, id: null }); aiPage(main); }));
+    h('div', { class: 'ai-conn' }, status.configured ? badge(`${t('connected')} · ${status.model}`, 'ok') : badge(AL({ fr: 'Assistant gratuit actif', en: 'Free assistant active', ar: 'المساعد المجاني مفعّل' }), 'ok'))));
+  main.append(tabs([['assistant', AL({ fr: 'Questions', en: 'Questions', ar: 'الأسئلة' })], ...(status.configured ? [['chat', t('ai_chat')]] : []), ['decisions', t('decisions')], ['team', t('ai_team')]], tab, (x) => { setQs({ tab: x, id: null }); aiPage(main); }));
   const body = h('div', { class: 'tab-body' });
   main.append(body);
   if (tab === 'team') return teamTab(body, status, () => aiPage(main));
   if (tab === 'decisions') return decisionsTab(body);
-  return chatTab(body, status);
+  if (tab === 'chat' && status.configured) return chatTab(body, status);
+  return assistantTab(body);
 }
 
 function renderMarkdown(text) {
@@ -231,4 +233,60 @@ function teamTab(body, status, rerender) {
       } }, t('run_analysis')) : null));
   }
   body.append(grid);
+}
+
+
+// ═════════ Free built-in assistant (no external AI) ═════════
+const GR_REC = ['SWL', 'HWS', 'SOP'], GR_VP = ['BEKP', 'NBSK', 'BHKP'];
+const QUESTIONS = [
+  { intent: 'max_price', q: { fr: 'Quel est le prix maximum à payer aujourd’hui ?', en: 'What is the maximum price to pay today?', ar: 'ما هو أقصى سعر يجب دفعه اليوم؟' }, params: [['grade', 'select', [...GR_REC, ...GR_VP], 'SWL']] },
+  { intent: 'best_supplier', q: { fr: 'Quel fournisseur a le coût fibre effectif le plus bas ?', en: 'Which supplier has the lowest effective fibre cost?', ar: 'أي مورد لديه أقل تكلفة فعلية للألياف؟' }, params: [] },
+  { intent: 'pulp_drop', q: { fr: 'La pâte vierge a baissé de … % : faut-il renégocier les recyclés ?', en: 'Virgin pulp fell … %: renegotiate recovered paper?', ar: 'انخفض اللب البكر … %: هل نعيد التفاوض؟' }, params: [['pct', 'number', null, 8, '%']] },
+  { intent: 'price_change', q: { fr: 'Peut-on changer le prix du Jumbo Roll de … % ?', en: 'Can we change the Jumbo Roll price by … %?', ar: 'هل يمكن تعديل سعر البكرة بنسبة … %؟' }, params: [['machine', 'select', ['PM1', 'PM2'], 'PM1'], ['pct', 'number', null, -5, '%']] },
+  { intent: 'cost_increase', q: { fr: 'Pourquoi le coût par tonne a-t-il changé ?', en: 'Why did the cost per tonne change?', ar: 'لماذا تغيرت تكلفة الطن؟' }, params: [['machine', 'select', ['PM1', 'PM2'], 'PM2']] },
+  { intent: 'savings', q: { fr: 'Comment économiser … TND sans réduire la qualité ?', en: 'How to save … TND without reducing quality?', ar: 'كيف نوفر … دينار دون المساس بالجودة؟' }, params: [['target', 'number', null, 100000, 'TND']] },
+  { intent: 'buy_now', q: { fr: 'Acheter la pâte maintenant ou négocier ?', en: 'Buy pulp now or negotiate?', ar: 'شراء اللب الآن أم التفاوض؟' }, params: [['grade', 'select', GR_VP, 'BEKP']] },
+];
+
+function renderAnswer(a, q, params) {
+  const proposeBtn = can('write') && a.sources.length ? h('button', { class: 'btn btn-sm', onclick: async (e) => {
+    e.target.disabled = true;
+    const r = await guard(() => api('/api/assistant/propose', { method: 'POST', body: { intent: a.intent, params } }));
+    toast(r.created ? AL({ fr: `Proposée à Hanen (#${r.id}) — voir Décisions`, en: `Proposed (#${r.id}) — see Decisions`, ar: `تم الاقتراح (#${r.id})` }) : AL({ fr: 'Déjà proposée', en: 'Already proposed', ar: 'مقترح مسبقًا' }));
+  } }, '＋ ', AL({ fr: 'Proposer comme décision', en: 'Propose as decision', ar: 'اقتراح كقرار' })) : null;
+  return h('div', { class: 'answer' },
+    h('div', { class: `lp-verdict ${a.tone}` }, a.verdict),
+    a.points.length ? h('ul', { class: 'answer-points' }, a.points.map((p) => h('li', {}, p))) : null,
+    a.table && a.table.rows.length ? table(a.table.head.map((x, i) => ({ key: String(i), label: x, num: i > 0 && /\d/.test(String(a.table.rows[0][i])) })), a.table.rows.map((r) => Object.fromEntries(r.map((v, i) => [String(i), v])))) : null,
+    a.savings_tnd ? h('p', {}, h('strong', { class: 'pos' }, `${AL({ fr: 'Économie chiffrée', en: 'Quantified savings', ar: 'التوفير المقدر' })} : ${tnd(a.savings_tnd)}`)) : null,
+    h('details', {}, h('summary', {}, AL({ fr: 'Calcul, sources et limites', en: 'Calculation, sources and limits', ar: 'الحساب والمصادر' })),
+      a.formula ? h('p', {}, h('code', { class: 'formula' }, a.formula)) : null,
+      h('p', { class: 'small' }, h('strong', {}, AL({ fr: 'Sources : ', en: 'Sources: ', ar: 'المصادر: ' })), a.sources.join(' · ') || '—'),
+      h('p', { class: 'small' }, h('strong', {}, AL({ fr: 'Confiance : ', en: 'Confidence: ', ar: 'الثقة: ' })), pct(a.confidence * 100, 0))),
+    a.missing.length ? h('div', { class: 'notice notice-warn small' }, a.missing.join(' · ')) : null,
+    proposeBtn ? h('div', { class: 'row' }, proposeBtn) : null);
+}
+
+function assistantTab(body) {
+  body.append(h('div', { class: 'notice' }, AL({ fr: 'Réponses calculées instantanément à partir de vos données validées, avec les formules de l’application. Gratuit, sans service externe : vos données ne quittent pas l’application.', en: 'Answers computed instantly from your validated data with the app’s formulas. Free, no external service: your data never leaves the app.', ar: 'إجابات فورية من بياناتكم المعتمدة. مجاني ودون خدمة خارجية.' })));
+  const list = h('div', { class: 'questions' });
+  for (const q of QUESTIONS) {
+    const inputs = {};
+    const out = h('div');
+    const ask = async (btn) => {
+      const params = Object.fromEntries(Object.entries(inputs).map(([k, el]) => [k, el.type === 'number' ? Number(el.value) : el.value]));
+      btn.disabled = true; out.replaceChildren(h('p', { class: 'muted small' }, t('ai_thinking')));
+      try { out.replaceChildren(renderAnswer(await api('/api/assistant', { method: 'POST', body: { intent: q.intent, params, lang: getLang() } }), q, params)); }
+      catch (e) { out.replaceChildren(h('p', { class: 'bad' }, e.message)); }
+      finally { btn.disabled = false; }
+    };
+    const controls = q.params.map(([k, type, opts, def, unit]) => {
+      const el = type === 'select' ? h('select', { 'aria-label': k }, opts.map((o) => h('option', { value: o, selected: o === def }, o))) : h('input', { type: 'number', inputmode: 'decimal', value: def, step: 'any', 'aria-label': k, class: 'q-num' });
+      inputs[k] = el;
+      return h('label', { class: 'q-param' }, el, unit ? h('span', {}, unit) : null);
+    });
+    const btn = h('button', { class: 'btn btn-primary btn-sm', onclick: (e) => ask(e.currentTarget) }, AL({ fr: 'Répondre', en: 'Answer', ar: 'أجب' }));
+    list.append(h('section', { class: 'card q-card' }, h('h3', { class: 'q-title' }, '✦ ', L(q.q)), h('div', { class: 'q-controls' }, controls, btn), out));
+  }
+  body.append(list);
 }

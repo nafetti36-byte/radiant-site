@@ -304,3 +304,15 @@ input.autofilled, select.autofilled { background: #eef8ec; transition: backgroun
   .modal .live-preview:focus-within .lp-note, .modal .live-preview:hover .lp-note { display: block; }
 }
 .ai-key-box .row input { flex: 1 1 220px; }
+/* ── Free assistant ── */
+.questions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 1100px) { .questions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.q-card { margin: 0; }
+.q-title { font-size: .98rem; margin-bottom: .6rem; }
+.q-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .4rem; }
+.q-param { display: inline-flex; align-items: center; gap: .3rem; }
+.q-param select, .q-param input { width: auto; min-width: 92px; }
+.q-param .q-num { width: 120px; }
+.answer { margin-top: .6rem; display: grid; gap: .5rem; }
+.answer-points { margin: 0; padding-inline-start: 1.1rem; font-size: .9rem; }
+.answer-points li { margin: .15rem 0; }
