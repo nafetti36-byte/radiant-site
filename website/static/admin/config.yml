@@ -1,0 +1,1111 @@
+backend:
+  name: git-gateway
+  branch: main
+media_folder: website/static/assets/uploads
+public_folder: /assets/uploads
+collections:
+- name: site
+  label: Website
+  files:
+  - file: website/content/settings.json
+    label: Settings (contact details, analytics)
+    name: settings
+    fields:
+    - label: siteUrl
+      name: siteUrl
+      widget: string
+      required: false
+    - label: brandName
+      name: brandName
+      widget: string
+      required: false
+    - label: ceoName
+      name: ceoName
+      widget: string
+      required: false
+    - label: email
+      name: email
+      widget: string
+      required: false
+    - label: phone
+      name: phone
+      widget: string
+      required: false
+    - label: whatsapp
+      name: whatsapp
+      widget: string
+      required: false
+    - label: linkedin
+      name: linkedin
+      widget: string
+      required: false
+    - label: location_en
+      name: location_en
+      widget: string
+      required: false
+    - label: location_ar
+      name: location_ar
+      widget: string
+      required: false
+    - label: location_fr
+      name: location_fr
+      widget: string
+      required: false
+    - label: profilePdfUrl
+      name: profilePdfUrl
+      widget: string
+      required: false
+    - label: ga4Id
+      name: ga4Id
+      widget: string
+      required: false
+  - file: website/content/en.json
+    label: English text
+    name: en
+    fields:
+    - label: metaTitle
+      name: metaTitle
+      widget: string
+    - label: metaDescription
+      name: metaDescription
+      widget: text
+    - label: nav
+      name: nav
+      widget: object
+      collapsed: true
+      fields:
+      - label: about
+        name: about
+        widget: string
+      - label: products
+        name: products
+        widget: string
+      - label: services
+        name: services
+        widget: string
+      - label: process
+        name: process
+        widget: string
+      - label: contact
+        name: contact
+        widget: string
+      - label: cta
+        name: cta
+        widget: string
+    - label: hero
+      name: hero
+      widget: object
+      collapsed: true
+      fields:
+      - label: tag
+        name: tag
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: ctaPrimary
+        name: ctaPrimary
+        widget: string
+      - label: ctaSecondary
+        name: ctaSecondary
+        widget: string
+      - label: profile
+        name: profile
+        widget: string
+    - label: facts
+      name: facts
+      widget: list
+      fields:
+      - label: num
+        name: num
+        widget: string
+      - label: label
+        name: label
+        widget: string
+    - label: advantage
+      name: advantage
+      widget: object
+      collapsed: true
+      fields:
+      - label: badge
+        name: badge
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: points
+        name: points
+        widget: list
+    - label: about
+      name: about
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: missionTitle
+        name: missionTitle
+        widget: string
+      - label: mission
+        name: mission
+        widget: text
+      - label: whyTitle
+        name: whyTitle
+        widget: string
+      - label: why
+        name: why
+        widget: text
+    - label: products
+      name: products
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: points
+          name: points
+          widget: list
+    - label: services
+      name: services
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+        - label: tag
+          name: tag
+          widget: string
+    - label: process
+      name: process
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: steps
+        name: steps
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+    - label: inquiry
+      name: inquiry
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: tipsTitle
+        name: tipsTitle
+        widget: string
+      - label: tips
+        name: tips
+        widget: list
+      - label: fields
+        name: fields
+        widget: object
+        collapsed: true
+        fields:
+        - label: company
+          name: company
+          widget: string
+        - label: name
+          name: name
+          widget: string
+        - label: email
+          name: email
+          widget: string
+        - label: phone
+          name: phone
+          widget: string
+        - label: role
+          name: role
+          widget: string
+        - label: roleBuyer
+          name: roleBuyer
+          widget: string
+        - label: roleSupplier
+          name: roleSupplier
+          widget: string
+        - label: product
+          name: product
+          widget: string
+        - label: volume
+          name: volume
+          widget: string
+        - label: incoterm
+          name: incoterm
+          widget: string
+        - label: destination
+          name: destination
+          widget: string
+        - label: message
+          name: message
+          widget: string
+        - label: messagePh
+          name: messagePh
+          widget: string
+        - label: consent
+          name: consent
+          widget: text
+        - label: send
+          name: send
+          widget: string
+    - label: contact
+      name: contact
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: emailLabel
+        name: emailLabel
+        widget: string
+      - label: phoneLabel
+        name: phoneLabel
+        widget: string
+      - label: whatsappLabel
+        name: whatsappLabel
+        widget: string
+      - label: locationLabel
+        name: locationLabel
+        widget: string
+      - label: ceoLabel
+        name: ceoLabel
+        widget: string
+      - label: linkedinLabel
+        name: linkedinLabel
+        widget: string
+      - label: formTitle
+        name: formTitle
+        widget: string
+      - label: name
+        name: name
+        widget: string
+      - label: email
+        name: email
+        widget: string
+      - label: message
+        name: message
+        widget: string
+      - label: send
+        name: send
+        widget: string
+      - label: formNote
+        name: formNote
+        widget: string
+    - label: thanks
+      name: thanks
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
+    - label: privacy
+      name: privacy
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: body
+        name: body
+        widget: list
+      - label: updated
+        name: updated
+        widget: string
+    - label: consent
+      name: consent
+      widget: object
+      collapsed: true
+      fields:
+      - label: text
+        name: text
+        widget: string
+      - label: accept
+        name: accept
+        widget: string
+      - label: decline
+        name: decline
+        widget: string
+    - label: footer
+      name: footer
+      widget: object
+      collapsed: true
+      fields:
+      - label: rights
+        name: rights
+        widget: string
+      - label: privacy
+        name: privacy
+        widget: string
+    - label: notFound
+      name: notFound
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
+  - file: website/content/ar.json
+    label: Arabic text
+    name: ar
+    fields:
+    - label: metaTitle
+      name: metaTitle
+      widget: string
+    - label: metaDescription
+      name: metaDescription
+      widget: text
+    - label: nav
+      name: nav
+      widget: object
+      collapsed: true
+      fields:
+      - label: about
+        name: about
+        widget: string
+      - label: products
+        name: products
+        widget: string
+      - label: services
+        name: services
+        widget: string
+      - label: process
+        name: process
+        widget: string
+      - label: contact
+        name: contact
+        widget: string
+      - label: cta
+        name: cta
+        widget: string
+    - label: hero
+      name: hero
+      widget: object
+      collapsed: true
+      fields:
+      - label: tag
+        name: tag
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: ctaPrimary
+        name: ctaPrimary
+        widget: string
+      - label: ctaSecondary
+        name: ctaSecondary
+        widget: string
+      - label: profile
+        name: profile
+        widget: string
+    - label: facts
+      name: facts
+      widget: list
+      fields:
+      - label: num
+        name: num
+        widget: string
+      - label: label
+        name: label
+        widget: string
+    - label: advantage
+      name: advantage
+      widget: object
+      collapsed: true
+      fields:
+      - label: badge
+        name: badge
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: points
+        name: points
+        widget: list
+    - label: about
+      name: about
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: missionTitle
+        name: missionTitle
+        widget: string
+      - label: mission
+        name: mission
+        widget: text
+      - label: whyTitle
+        name: whyTitle
+        widget: string
+      - label: why
+        name: why
+        widget: text
+    - label: products
+      name: products
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: points
+          name: points
+          widget: list
+    - label: services
+      name: services
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+        - label: tag
+          name: tag
+          widget: string
+    - label: process
+      name: process
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: steps
+        name: steps
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+    - label: inquiry
+      name: inquiry
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: tipsTitle
+        name: tipsTitle
+        widget: string
+      - label: tips
+        name: tips
+        widget: list
+      - label: fields
+        name: fields
+        widget: object
+        collapsed: true
+        fields:
+        - label: company
+          name: company
+          widget: string
+        - label: name
+          name: name
+          widget: string
+        - label: email
+          name: email
+          widget: string
+        - label: phone
+          name: phone
+          widget: string
+        - label: role
+          name: role
+          widget: string
+        - label: roleBuyer
+          name: roleBuyer
+          widget: string
+        - label: roleSupplier
+          name: roleSupplier
+          widget: string
+        - label: product
+          name: product
+          widget: string
+        - label: volume
+          name: volume
+          widget: string
+        - label: incoterm
+          name: incoterm
+          widget: string
+        - label: destination
+          name: destination
+          widget: string
+        - label: message
+          name: message
+          widget: string
+        - label: messagePh
+          name: messagePh
+          widget: string
+        - label: consent
+          name: consent
+          widget: text
+        - label: send
+          name: send
+          widget: string
+    - label: contact
+      name: contact
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: emailLabel
+        name: emailLabel
+        widget: string
+      - label: phoneLabel
+        name: phoneLabel
+        widget: string
+      - label: whatsappLabel
+        name: whatsappLabel
+        widget: string
+      - label: locationLabel
+        name: locationLabel
+        widget: string
+      - label: ceoLabel
+        name: ceoLabel
+        widget: string
+      - label: linkedinLabel
+        name: linkedinLabel
+        widget: string
+      - label: formTitle
+        name: formTitle
+        widget: string
+      - label: name
+        name: name
+        widget: string
+      - label: email
+        name: email
+        widget: string
+      - label: message
+        name: message
+        widget: string
+      - label: send
+        name: send
+        widget: string
+      - label: formNote
+        name: formNote
+        widget: string
+    - label: thanks
+      name: thanks
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
+    - label: privacy
+      name: privacy
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: body
+        name: body
+        widget: list
+      - label: updated
+        name: updated
+        widget: string
+    - label: consent
+      name: consent
+      widget: object
+      collapsed: true
+      fields:
+      - label: text
+        name: text
+        widget: string
+      - label: accept
+        name: accept
+        widget: string
+      - label: decline
+        name: decline
+        widget: string
+    - label: footer
+      name: footer
+      widget: object
+      collapsed: true
+      fields:
+      - label: rights
+        name: rights
+        widget: string
+      - label: privacy
+        name: privacy
+        widget: string
+    - label: notFound
+      name: notFound
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
+  - file: website/content/fr.json
+    label: French text
+    name: fr
+    fields:
+    - label: metaTitle
+      name: metaTitle
+      widget: string
+    - label: metaDescription
+      name: metaDescription
+      widget: text
+    - label: nav
+      name: nav
+      widget: object
+      collapsed: true
+      fields:
+      - label: about
+        name: about
+        widget: string
+      - label: products
+        name: products
+        widget: string
+      - label: services
+        name: services
+        widget: string
+      - label: process
+        name: process
+        widget: string
+      - label: contact
+        name: contact
+        widget: string
+      - label: cta
+        name: cta
+        widget: string
+    - label: hero
+      name: hero
+      widget: object
+      collapsed: true
+      fields:
+      - label: tag
+        name: tag
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: ctaPrimary
+        name: ctaPrimary
+        widget: string
+      - label: ctaSecondary
+        name: ctaSecondary
+        widget: string
+      - label: profile
+        name: profile
+        widget: string
+    - label: facts
+      name: facts
+      widget: list
+      fields:
+      - label: num
+        name: num
+        widget: string
+      - label: label
+        name: label
+        widget: string
+    - label: advantage
+      name: advantage
+      widget: object
+      collapsed: true
+      fields:
+      - label: badge
+        name: badge
+        widget: string
+      - label: title
+        name: title
+        widget: string
+      - label: points
+        name: points
+        widget: list
+    - label: about
+      name: about
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: missionTitle
+        name: missionTitle
+        widget: string
+      - label: mission
+        name: mission
+        widget: text
+      - label: whyTitle
+        name: whyTitle
+        widget: string
+      - label: why
+        name: why
+        widget: text
+    - label: products
+      name: products
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: text
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: points
+          name: points
+          widget: list
+    - label: services
+      name: services
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: items
+        name: items
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+        - label: tag
+          name: tag
+          widget: string
+    - label: process
+      name: process
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: steps
+        name: steps
+        widget: list
+        fields:
+        - label: title
+          name: title
+          widget: string
+        - label: desc
+          name: desc
+          widget: string
+    - label: inquiry
+      name: inquiry
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: tipsTitle
+        name: tipsTitle
+        widget: string
+      - label: tips
+        name: tips
+        widget: list
+      - label: fields
+        name: fields
+        widget: object
+        collapsed: true
+        fields:
+        - label: company
+          name: company
+          widget: string
+        - label: name
+          name: name
+          widget: string
+        - label: email
+          name: email
+          widget: string
+        - label: phone
+          name: phone
+          widget: string
+        - label: role
+          name: role
+          widget: string
+        - label: roleBuyer
+          name: roleBuyer
+          widget: string
+        - label: roleSupplier
+          name: roleSupplier
+          widget: string
+        - label: product
+          name: product
+          widget: string
+        - label: volume
+          name: volume
+          widget: string
+        - label: incoterm
+          name: incoterm
+          widget: string
+        - label: destination
+          name: destination
+          widget: string
+        - label: message
+          name: message
+          widget: string
+        - label: messagePh
+          name: messagePh
+          widget: string
+        - label: consent
+          name: consent
+          widget: text
+        - label: send
+          name: send
+          widget: string
+    - label: contact
+      name: contact
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: subtitle
+        name: subtitle
+        widget: string
+      - label: emailLabel
+        name: emailLabel
+        widget: string
+      - label: phoneLabel
+        name: phoneLabel
+        widget: string
+      - label: whatsappLabel
+        name: whatsappLabel
+        widget: string
+      - label: locationLabel
+        name: locationLabel
+        widget: string
+      - label: ceoLabel
+        name: ceoLabel
+        widget: string
+      - label: linkedinLabel
+        name: linkedinLabel
+        widget: string
+      - label: formTitle
+        name: formTitle
+        widget: string
+      - label: name
+        name: name
+        widget: string
+      - label: email
+        name: email
+        widget: string
+      - label: message
+        name: message
+        widget: string
+      - label: send
+        name: send
+        widget: string
+      - label: formNote
+        name: formNote
+        widget: string
+    - label: thanks
+      name: thanks
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
+    - label: privacy
+      name: privacy
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: body
+        name: body
+        widget: list
+      - label: updated
+        name: updated
+        widget: string
+    - label: consent
+      name: consent
+      widget: object
+      collapsed: true
+      fields:
+      - label: text
+        name: text
+        widget: string
+      - label: accept
+        name: accept
+        widget: string
+      - label: decline
+        name: decline
+        widget: string
+    - label: footer
+      name: footer
+      widget: object
+      collapsed: true
+      fields:
+      - label: rights
+        name: rights
+        widget: string
+      - label: privacy
+        name: privacy
+        widget: string
+    - label: notFound
+      name: notFound
+      widget: object
+      collapsed: true
+      fields:
+      - label: title
+        name: title
+        widget: string
+      - label: text
+        name: text
+        widget: string
+      - label: back
+        name: back
+        widget: string
