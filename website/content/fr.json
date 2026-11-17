@@ -1,0 +1,87 @@
+{
+  "metaTitle": "Radiant Advising Services | Courtage papier recyclé, pâte et bobines mères",
+  "metaDescription": "Courtage industriel et conseil en négoce : papiers et cartons récupérés (OCC), pâte vierge, bobines mères ouate, emballage et fournitures CHR entre la Tunisie, le Golfe, l'Europe et l'Afrique.",
+  "nav": { "about": "À propos", "products": "Produits", "services": "Services", "process": "Méthode", "contact": "Contact", "cta": "Demander un devis" },
+  "hero": {
+    "tag": "Courtage industriel • Sourcing • Structuration de transactions",
+    "title": "Valoriser la matière industrielle, du déchet aux marchés mondiaux.",
+    "subtitle": "Nous mettons en relation fournisseurs, papeteries et acheteurs pour les papiers récupérés, la pâte vierge, les bobines mères ouate, l'emballage et le CHR — avec des contreparties vérifiées, des spécifications claires et une documentation rigoureuse.",
+    "ctaPrimary": "Envoyer une demande",
+    "ctaSecondary": "Voir les produits",
+    "profile": "Télécharger la présentation (PDF)"
+  },
+  "facts": [
+    { "num": "3+", "label": "Régions couvertes : MENA • Europe • Afrique" },
+    { "num": "2,5 %", "label": "Modèle de commission habituel" },
+    { "num": "FOB · CIF · EXW", "label": "Incoterms pris en charge" }
+  ],
+  "advantage": {
+    "badge": "L'avantage Radiant",
+    "title": "Transactions structurées rapidement, documentation claire.",
+    "points": ["Vérification des fournisseurs et acheteurs", "Conditions FOB / CIF et modalités de paiement", "Spécifications qualité et prévention des litiges", "Partenariats de long terme"]
+  },
+  "about": {
+    "title": "À propos de Radiant",
+    "subtitle": "Un intermédiaire stratégique entre les chaînes d'approvisionnement industrielles de la Tunisie, du Golfe, de l'Europe et de l'Afrique.",
+    "missionTitle": "Mission",
+    "mission": "Construire des ponts commerciaux fiables, transparents et rentables pour le papier recyclé, la pâte vierge, l'emballage et les consommables CHR — au service de l'économie circulaire.",
+    "whyTitle": "Pourquoi nous",
+    "why": "Nous associons connaissance terrain de l'industrie, processus structurés et communication claire pour réduire les risques et accélérer les transactions."
+  },
+  "products": {
+    "title": "Produits et catégories",
+    "subtitle": "Nous accompagnons le sourcing, la vérification, les spécifications et l'exécution des transactions pour les catégories suivantes.",
+    "items": [
+      { "title": "Papiers et cartons récupérés", "points": ["OCC (vieux cartons ondulés)", "SOP / SWL / HWS / LWS", "Sortes triées selon le cahier des charges"] },
+      { "title": "Pâte vierge", "points": ["Pâte pour ouate et hygiène", "Normes de qualité et de conditionnement", "Programmes de volumes réguliers"] },
+      { "title": "Bobines mères ouate", "points": ["Papier toilette, serviette, essuie-mains", "Grammage, plis et laize sur demande", "Exécution FOB / CIF"] },
+      { "title": "Emballage et CHR", "points": ["Matériaux d'emballage", "Consommables hôtels, restaurants, cafés", "Approvisionnement économique et contrôlé"] }
+    ]
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Ce que nous apportons aux fournisseurs, papeteries et acheteurs.",
+    "items": [
+      { "title": "Courtage industriel", "desc": "Nous rapprochons acheteurs et vendeurs, négocions les conditions et assurons une exécution fluide.", "tag": "Papiers récupérés • Pâte • Bobines mères" },
+      { "title": "Conseil et sourcing", "desc": "Veille marché, recherche de fournisseurs et stratégie d'approvisionnement pour les papeteries et transformateurs.", "tag": "Tunisie • Golfe • Europe • Afrique" },
+      { "title": "Documentation et maîtrise des risques", "desc": "Spécifications, conformité de base, prévention des litiges et documentation claire des transactions.", "tag": "Confiance • Transparence • Performance" }
+    ]
+  },
+  "process": {
+    "title": "Notre méthode",
+    "subtitle": "Un processus simple qui réduit les risques et accélère l'exécution.",
+    "steps": [
+      { "title": "Besoins et spécifications", "desc": "Nous recueillons sortes, volumes, conditions et destination." },
+      { "title": "Mise en relation et vérification", "desc": "Nous présélectionnons des contreparties vérifiées et confirmons la faisabilité." },
+      { "title": "Structuration", "desc": "Nous alignons documents, conditions de paiement et logistique pour une exécution sans heurts." }
+    ]
+  },
+  "inquiry": {
+    "title": "Demande commerciale",
+    "subtitle": "Envoyez vos spécifications, nous revenons vers vous avec les prochaines étapes.",
+    "tipsTitle": "À préciser",
+    "tips": ["Sorte / grammage / type de balle", "Volume mensuel et calendrier de chargement", "Incoterm (FOB / CIF) et port de destination", "Prix cible et mode de paiement"],
+    "fields": { "company": "Société", "name": "Votre nom", "email": "E-mail", "phone": "Téléphone / WhatsApp", "role": "Je suis", "roleBuyer": "Acheteur / papeterie", "roleSupplier": "Fournisseur", "product": "Produit", "volume": "Volume (tonnes / mois)", "incoterm": "Incoterm", "destination": "Destination / port", "message": "Notes / spécifications", "messagePh": "Spécifications qualité, humidité, conditionnement, chargement…", "consent": "J'accepte que Radiant utilise ces informations pour répondre à ma demande (voir la politique de confidentialité).", "send": "Envoyer la demande" }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Échangeons directement.",
+    "emailLabel": "E-mail", "phoneLabel": "Téléphone", "whatsappLabel": "WhatsApp", "locationLabel": "Localisation", "ceoLabel": "PDG", "linkedinLabel": "LinkedIn",
+    "formTitle": "Envoyer un message", "name": "Votre nom", "email": "E-mail", "message": "Message", "send": "Envoyer",
+    "formNote": "Besoin d'un devis ? Utilisez le formulaire de demande commerciale ci-dessus."
+  },
+  "thanks": { "title": "Merci", "text": "Votre message a bien été reçu. Nous vous répondrons rapidement.", "back": "Retour à l'accueil" },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "body": [
+      "Radiant Advising Services collecte uniquement les informations transmises via nos formulaires (nom, société, e-mail, téléphone et message) afin de répondre à votre demande et de préparer des propositions commerciales.",
+      "Nous ne vendons pas vos données. Les envois sont conservés par notre hébergeur (Netlify) et dans notre messagerie professionnelle, uniquement pendant la durée nécessaire à la relation commerciale ou imposée par la loi.",
+      "Si la mesure d'audience est activée, elle n'est chargée qu'après votre accord dans le bandeau cookies.",
+      "Vous pouvez demander à tout moment l'accès, la rectification ou la suppression de vos données via les coordonnées de ce site."
+    ],
+    "updated": "Dernière mise à jour"
+  },
+  "consent": { "text": "Nous utilisons des cookies de mesure d'audience, uniquement avec votre accord.", "accept": "Accepter", "decline": "Refuser" },
+  "footer": { "rights": "Tous droits réservés.", "privacy": "Confidentialité" },
+  "notFound": { "title": "Page introuvable", "text": "La page demandée n'existe pas.", "back": "Retour à l'accueil" }
+}

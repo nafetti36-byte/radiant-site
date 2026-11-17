@@ -1,0 +1,202 @@
+{
+  "metaTitle": "Radiant Advising Services | Waste Paper, Pulp & Jumbo Roll Brokerage",
+  "metaDescription": "Industrial brokerage and trade consulting for OCC and recovered paper, virgin pulp, tissue jumbo rolls, packaging and HORECA supplies between Tunisia, the GCC, Europe and Africa.",
+  "nav": {
+    "about": "About",
+    "products": "Products",
+    "services": "Services",
+    "process": "Process",
+    "contact": "Contact",
+    "cta": "Request a quote"
+  },
+  "hero": {
+    "tag": "Industrial brokerage • Sourcing • Trade structuring",
+    "title": "Structuring industrial value from waste to global markets.",
+    "subtitle": "We connect suppliers, mills and buyers across recovered paper, virgin pulp, tissue jumbo rolls, packaging and HORECA — with verified counterparties, clear specifications and clean documentation.",
+    "ctaPrimary": "Send a trade inquiry",
+    "ctaSecondary": "See products",
+    "profile": "Download company profile (PDF)"
+  },
+  "facts": [
+    {
+      "num": "3+",
+      "label": "Regions covered: MENA • Europe • Africa"
+    },
+    {
+      "num": "2.5%",
+      "label": "Typical commission model"
+    },
+    {
+      "num": "FOB · CIF · EXW",
+      "label": "Trade terms supported"
+    }
+  ],
+  "advantage": {
+    "badge": "The Radiant advantage",
+    "title": "Fast deal structuring, clean documentation.",
+    "points": [
+      "Supplier & buyer verification",
+      "FOB / CIF terms and payment structure",
+      "Quality specs & dispute prevention",
+      "Long-term partnership focus"
+    ]
+  },
+  "about": {
+    "title": "About Radiant",
+    "subtitle": "A strategic intermediary bridging industrial supply chains between Tunisia, the GCC, Europe and Africa.",
+    "missionTitle": "Mission",
+    "mission": "Build reliable, transparent and profitable trade bridges for recycled paper, virgin pulp, packaging and HORECA consumables — enabling circular-economy growth.",
+    "whyTitle": "Why us",
+    "why": "We combine on-the-ground industry knowledge with structured workflows and clear communication to reduce risk and accelerate deals."
+  },
+  "products": {
+    "title": "Products & categories",
+    "subtitle": "We support sourcing, verification, specifications and trade execution for the following categories.",
+    "items": [
+      {
+        "title": "Recovered paper grades",
+        "points": [
+          "OCC (old corrugated containers)",
+          "SOP / SWL / HWS / LWS",
+          "Sorted grades to mill specification"
+        ]
+      },
+      {
+        "title": "Virgin pulp",
+        "points": [
+          "Tissue & hygiene pulp",
+          "Quality and packing standards",
+          "Regular volume programmes"
+        ]
+      },
+      {
+        "title": "Tissue jumbo rolls",
+        "points": [
+          "Toilet, napkin and towel grades",
+          "GSM, ply and width to order",
+          "FOB / CIF execution"
+        ]
+      },
+      {
+        "title": "Packaging & HORECA",
+        "points": [
+          "Packaging materials",
+          "Hotel, restaurant & café consumables",
+          "Cost-efficient, quality-controlled supply"
+        ]
+      }
+    ]
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "What we deliver to suppliers, mills and buyers.",
+    "items": [
+      {
+        "title": "Industrial brokerage",
+        "desc": "We match buyers and sellers, negotiate terms and ensure smooth execution.",
+        "tag": "Recovered paper • Pulp • Jumbo rolls"
+      },
+      {
+        "title": "Consulting & sourcing",
+        "desc": "Market intelligence, supplier discovery and sourcing strategy for mills and converters.",
+        "tag": "Tunisia • GCC • Europe • Africa"
+      },
+      {
+        "title": "Documentation & risk control",
+        "desc": "Specifications, compliance basics, dispute prevention and clear deal documentation.",
+        "tag": "Trust • Transparency • Performance"
+      }
+    ]
+  },
+  "process": {
+    "title": "How we work",
+    "subtitle": "A simple process that reduces risk and speeds execution.",
+    "steps": [
+      {
+        "title": "Needs & specs",
+        "desc": "We collect target grades, volumes, terms and destination details."
+      },
+      {
+        "title": "Match & verify",
+        "desc": "We shortlist verified suppliers or buyers and confirm feasibility."
+      },
+      {
+        "title": "Deal structuring",
+        "desc": "We align documents, payment terms and logistics for smooth execution."
+      }
+    ]
+  },
+  "inquiry": {
+    "title": "Trade inquiry",
+    "subtitle": "Send your specifications and we will reply with next steps.",
+    "tipsTitle": "What to include",
+    "tips": [
+      "Grade / GSM / bale type",
+      "Monthly volume and loading schedule",
+      "Incoterm (FOB / CIF) and destination port",
+      "Target price and payment preference"
+    ],
+    "fields": {
+      "company": "Company name",
+      "name": "Your name",
+      "email": "Email",
+      "phone": "Phone / WhatsApp",
+      "role": "I am a",
+      "roleBuyer": "Buyer / mill",
+      "roleSupplier": "Supplier",
+      "product": "Product",
+      "volume": "Volume (tonnes / month)",
+      "incoterm": "Incoterm",
+      "destination": "Destination / port",
+      "message": "Notes / specifications",
+      "messagePh": "Quality specs, moisture, packing, loading schedule…",
+      "consent": "I agree that Radiant may use these details to answer my inquiry (see the privacy notice).",
+      "send": "Send inquiry"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Talk to us directly.",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "whatsappLabel": "WhatsApp",
+    "locationLabel": "Location",
+    "ceoLabel": "CEO",
+    "linkedinLabel": "LinkedIn",
+    "formTitle": "Send a message",
+    "name": "Your name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send message",
+    "formNote": "Prefer a quote? Use the trade inquiry form above."
+  },
+  "thanks": {
+    "title": "Thank you",
+    "text": "Your message has been received. We will get back to you shortly.",
+    "back": "Back to the home page"
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "body": [
+      "Radiant Advising Services collects only the details you send through our forms (name, company, email, phone and your message) to respond to your inquiry and to prepare trade proposals.",
+      "We do not sell your data. Form submissions are stored by our hosting provider (Netlify) and in our business email. We keep them only as long as needed for the business relationship or as required by law.",
+      "If analytics is enabled, it is loaded only after you accept it in the cookie banner.",
+      "You can ask us to access, correct or delete your data at any time using the contact details on this website."
+    ],
+    "updated": "Last updated"
+  },
+  "consent": {
+    "text": "We use analytics cookies to understand site usage, only with your consent.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "privacy": "Privacy notice"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you are looking for does not exist.",
+    "back": "Go to the home page"
+  }
+}
