@@ -126,7 +126,7 @@ table.reg td{{height:9mm}} table.reg th{{font-size:7.4pt}}
  <div class="sig">
   <div class="box"><h4>For Radiant Advising Services<span dir="rtl">عن رادينت للخدمات الاستشارية</span></h4>
    <div class="ln">Name / الاسم<b>Ahmed Nafetti</b></div>
-   <div class="ln">Title / الصفة<b>&nbsp;</b></div>
+   <div class="ln">Title / الصفة<b>Co-Founder · الشريك المؤسس</b></div>
    <div class="ln">Signature / التوقيع<b>&nbsp;</b></div>
    <div class="ln">Date / التاريخ<b>____ / ____ / 2026</b></div>
    <div class="seal">Company stamp<br>ختم الشركة</div></div>

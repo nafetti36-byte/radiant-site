@@ -118,7 +118,7 @@ slides.append(slide("Next steps","الخطوات التالية",'''<div class="
 <div class="nx"><b>2</b><p>Share <strong>5–8 Saudi factory profiles</strong> (plastics, packaging, building materials)</p><p class="arf" dir="rtl">مشاركة 5–8 ملفات لمصانع سعودية</p></div>
 <div class="nx"><b>3</b><p>Fix a date for a <strong>joint visit to Tunis</strong></p><p class="arf" dir="rtl">تحديد موعد لزيارة مشتركة إلى تونس</p></div>
 <div class="nx"><b>4</b><p>Launch the <strong>shared deal register</strong> and monthly joint report</p><p class="arf" dir="rtl">إطلاق سجل الصفقات المشترك والتقرير الشهري</p></div></div>
-<div class="contact"><div>{logo}</div><div><b>Radiant Advising Services</b><br>Ahmed Nafetti · contact@radiantadvisingservicetn.com · +216 27 986 056 (WhatsApp)<br>www.radiantadvisingservicetn.com</div><div class="thx">Thank you<span class="arf">شكراً لكم</span></div></div>'''.replace("{logo}",logo)))
+<div class="contact"><div>{logo}</div><div><b>Radiant Advising Services</b><br>Ahmed Nafetti, Co-Founder · contact@radiantadvisingservicetn.com · +216 27 986 056 (WhatsApp)<br>www.radiantadvisingservicetn.com</div><div class="thx">Thank you<span class="arf">شكراً لكم</span></div></div>'''.replace("{logo}",logo)))
 
 css=f'''
 @font-face{{font-family:Inter;src:url(file://{F}/inter-400.woff2);font-weight:400}}
