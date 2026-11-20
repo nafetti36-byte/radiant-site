@@ -13,3 +13,4 @@
 | `docs/07-export-growth-partnership-brief.md` | Export Growth (export.sa) partnership brief: KSA⇄Tunisia trade data, named targets, deal economics, 90-day pilot, meeting plan |
 | `docs/08-export-growth-brief-EN-AR.md` | Bilingual (English / Arabic) executive summary for the Export Growth meeting |
 | `docs/Radiant-ExportGrowth-MoU-EN-AR.docx` / `.pdf` | Bilingual draft collaboration MoU (EN/AR) with commission, pilot and deal-registration annexes |
+| `docs/Radiant-ExportGrowth-MoU-Official-EN-AR.pdf` | Designed, branded bilingual MoU (cover, logo, header/footer, signature page, annexes); source in `docs/mou-source/` |
