@@ -11,3 +11,4 @@
 | `docs/05-90-day-launch-plan.md` | Phase 5: 90-day plan with measurable targets and budget guardrails |
 | `docs/06-executive-report-initial.md` | First executive report (honest status) |
 | `docs/07-export-growth-partnership-brief.md` | Export Growth (export.sa) partnership brief: KSA⇄Tunisia trade data, named targets, deal economics, 90-day pilot, meeting plan |
+| `docs/08-export-growth-brief-EN-AR.md` | Bilingual (English / Arabic) executive summary for the Export Growth meeting |
