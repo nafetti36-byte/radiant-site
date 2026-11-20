@@ -119,6 +119,22 @@ table.reg td{{height:9mm}} table.reg th{{font-size:7.4pt}}
 {clause_pages}
 
 <div class="page">
+ <div class="hdr"><div class="l">{logo}Radiant Advising Services</div><div class="r">Annexes · <span style="font-family:PlexAr">الملاحق</span></div></div>
+ <div class="secbar"><h2><span>Annex A — Commission Schedule</span><span class="ar" dir="rtl">الملحق (أ) — جدول العمولات</span></h2></div>
+ {annexA}
+ <div class="secbar"><h2><span>Annex B — 90-Day Pilot Plan</span><span class="ar" dir="rtl">الملحق (ب) — خطة البرنامج التجريبي</span></h2></div>
+ {annexB}
+ <div class="ftr"><span>Radiant Advising Services · contact@radiantadvisingservicetn.com · +216 27 986 056 · radiantadvisingservicetn.com</span><span class="ref">Confidential · سري</span></div>
+</div>
+
+<div class="page">
+ <div class="hdr"><div class="l">{logo}Radiant Advising Services</div><div class="r">Annexes · <span style="font-family:PlexAr">الملاحق</span></div></div>
+ <div class="secbar"><h2><span>Annex C — Deal Registration Form</span><span class="ar" dir="rtl">الملحق (ج) — نموذج تسجيل الصفقات</span></h2></div>
+ {annexC}
+ <p style="font-size:8.5pt;color:var(--muted)">The first registration of a counterparty establishes the originating Party (Clause 9). <span dir="rtl" style="font-family:PlexAr">يُعدّ أول تسجيل لأي جهة مُثبِتاً للطرف المُنشئ (البند 9).</span></p>
+ <div class="ftr"><span>Radiant Advising Services · contact@radiantadvisingservicetn.com · +216 27 986 056 · radiantadvisingservicetn.com</span><span class="ref">Confidential · سري</span></div>
+</div>
+<div class="page">
  <div class="hdr"><div class="l">{logo}Radiant Advising Services</div><div class="r">Signatures · <span style="font-family:PlexAr">التوقيعات</span></div></div>
  <div class="secbar"><h2><span>Signatures</span><span class="ar" dir="rtl">التوقيعات</span></h2></div>
  <p>IN WITNESS WHEREOF, the Parties have signed this Memorandum of Understanding in two original copies, in Arabic and English, each Party retaining one copy.</p>
@@ -141,21 +157,5 @@ table.reg td{{height:9mm}} table.reg th{{font-size:7.4pt}}
  <div class="ftr"><span>Radiant Advising Services · contact@radiantadvisingservicetn.com · +216 27 986 056 · radiantadvisingservicetn.com</span><span class="ref">Confidential · سري</span></div>
 </div>
 
-<div class="page">
- <div class="hdr"><div class="l">{logo}Radiant Advising Services</div><div class="r">Annexes · <span style="font-family:PlexAr">الملاحق</span></div></div>
- <div class="secbar"><h2><span>Annex A — Commission Schedule</span><span class="ar" dir="rtl">الملحق (أ) — جدول العمولات</span></h2></div>
- {annexA}
- <div class="secbar"><h2><span>Annex B — 90-Day Pilot Plan</span><span class="ar" dir="rtl">الملحق (ب) — خطة البرنامج التجريبي</span></h2></div>
- {annexB}
- <div class="ftr"><span>Radiant Advising Services · contact@radiantadvisingservicetn.com · +216 27 986 056 · radiantadvisingservicetn.com</span><span class="ref">Confidential · سري</span></div>
-</div>
-
-<div class="page">
- <div class="hdr"><div class="l">{logo}Radiant Advising Services</div><div class="r">Annexes · <span style="font-family:PlexAr">الملاحق</span></div></div>
- <div class="secbar"><h2><span>Annex C — Deal Registration Form</span><span class="ar" dir="rtl">الملحق (ج) — نموذج تسجيل الصفقات</span></h2></div>
- {annexC}
- <p style="font-size:8.5pt;color:var(--muted)">The first registration of a counterparty establishes the originating Party (Clause 9). <span dir="rtl" style="font-family:PlexAr">يُعدّ أول تسجيل لأي جهة مُثبِتاً للطرف المُنشئ (البند 9).</span></p>
- <div class="ftr"><span>Radiant Advising Services · contact@radiantadvisingservicetn.com · +216 27 986 056 · radiantadvisingservicetn.com</span><span class="ref">Confidential · سري</span></div>
-</div>
 </body></html>'''
 open(S+"/mou.html","w").write(doc)

@@ -163,20 +163,6 @@ clause("14. Nature of this MoU and Language",
  "14. طبيعة المذكرة واللغة",
  ["تُثبت هذه المذكرة نوايا الطرفين وهي غير ملزمة، باستثناء البنود 4 و5 و6 و7 و10 و11 و12 و13 فهي ملزمة. وحُرِّرت باللغتين العربية والإنجليزية ولكل منهما الحجية ذاتها، وعند التعارض يُعتمد النص العربي."])
 
-# signatures
-doc.add_paragraph()
-center("SIGNATURES  |  التوقيعات", size=12)
-t = doc.add_table(rows=6, cols=2); t.style='Table Grid'
-rows = [("For Radiant Advising Services / عن رادينت للخدمات الاستشارية","For Export Growth / عن نمو الصادرات"),
-        ("Name / الاسم: Ahmed Nafetti","Name / الاسم: Abdullah Almuharib / عبدالله المحارب"),
-        ("Title / الصفة: Co-Founder / الشريك المؤسس","Title / الصفة: Co-Founder / الشريك المؤسس"),
-        ("Signature / التوقيع: ________________","Signature / التوقيع: ________________"),
-        ("Date / التاريخ: ____ / ____ / 2026","Date / التاريخ: ____ / ____ / 2026"),
-        ("Stamp / الختم:\n\n","Stamp / الختم:\n\n")]
-for i,(a,b) in enumerate(rows):
-    run(t.cell(i,0).paragraphs[0], a, bold=(i==0)); run(t.cell(i,1).paragraphs[0], b, bold=(i==0))
-    if i==0: shade(t.cell(i,0),'E8EEF5'); shade(t.cell(i,1),'E8EEF5')
-
 doc.add_page_break()
 center("ANNEX A — COMMISSION SCHEDULE  |  الملحق (أ) — جدول العمولات", size=12)
 t = doc.add_table(rows=1, cols=3); t.style='Table Grid'
@@ -207,5 +193,20 @@ t = doc.add_table(rows=1, cols=8); t.style='Table Grid'
 for i,h in enumerate(["Date & time / التاريخ والوقت","Registered by / المسجِّل","Counterparty / الجهة","Country / الدولة","Product (HS) / المنتج","Est. volume / الكمية","Stage / المرحلة","Acknowledged / الإقرار"]):
     run(t.rows[0].cells[i].paragraphs[0], h, bold=True, size=8); shade(t.rows[0].cells[i],'E8EEF5')
 for _ in range(8): t.add_row()
+doc.add_page_break()
+# signatures
+doc.add_paragraph()
+center("SIGNATURES  |  التوقيعات", size=12)
+t = doc.add_table(rows=6, cols=2); t.style='Table Grid'
+rows = [("For Radiant Advising Services / عن رادينت للخدمات الاستشارية","For Export Growth / عن نمو الصادرات"),
+        ("Name / الاسم: Ahmed Nafetti","Name / الاسم: Abdullah Almuharib / عبدالله المحارب"),
+        ("Title / الصفة: Co-Founder / الشريك المؤسس","Title / الصفة: Co-Founder / الشريك المؤسس"),
+        ("Signature / التوقيع: ________________","Signature / التوقيع: ________________"),
+        ("Date / التاريخ: ____ / ____ / 2026","Date / التاريخ: ____ / ____ / 2026"),
+        ("Stamp / الختم:\n\n","Stamp / الختم:\n\n")]
+for i,(a,b) in enumerate(rows):
+    run(t.cell(i,0).paragraphs[0], a, bold=(i==0)); run(t.cell(i,1).paragraphs[0], b, bold=(i==0))
+    if i==0: shade(t.cell(i,0),'E8EEF5'); shade(t.cell(i,1),'E8EEF5')
+
 doc.save(OUT)
 print("saved", OUT)
